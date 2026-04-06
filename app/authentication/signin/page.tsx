@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Car, Shield, Star, Zap } from "lucide-react";
@@ -46,6 +46,18 @@ export default function SignInPage() {
   const selectHandler = (value: string) => {
     setAuthMethod(value);
   };
+
+  useEffect(() => {
+    if (!formState?.message) return;
+
+    if (formState.status === "success") {
+      toast.success(formState.message);
+    }
+
+    if (formState.status === "error") {
+      toast.error(formState.message);
+    }
+  }, [formState]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen px-4 lg:px-0">

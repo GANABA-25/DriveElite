@@ -24,3 +24,8 @@ export type SignInFormState = {
   message?: string;
   errors?: Partial<Record<keyof SignInDataTypes, string>>;
 };
+
+export interface verifyEmailDataTypes {
+  token: string;
+  email: string;
+}

@@ -11,7 +11,8 @@ import { Mail, Phone, Lock, User, Car, Shield, Star, Zap } from "lucide-react";
 
 import { validateSignUpData } from "../../../util/validation";
 import FormError from "../../../components/formError";
-import loadingAnimation from "@/lottie/formLoadingAnimation.json";
+// import loadingAnimation from "@/lottie/formLoadingAnimation.json";
+import loadingAnimation from "../../../lottie/formLoadingAnimation.json";
 import FeatureItem from "@/components/featureItem";
 
 import { FormDataTypes } from "@/types/auth";
