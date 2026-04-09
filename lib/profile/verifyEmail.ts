@@ -32,6 +32,12 @@ export async function verifyEmail(
       };
     }
 
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+
+    await user.save();
+
     return {
       status: "success",
       message: "Email verified successfully",
