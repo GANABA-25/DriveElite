@@ -10,7 +10,7 @@ import Input from "@/components/input";
 import { Binary } from "lucide-react";
 import Lottie from "lottie-react";
 import { FormState } from "@/types/auth";
-import { useVerifyAccount } from "@/lib/profile/useVerifyAccount";
+import { VerifyOtp } from "@/lib/profile/verifyOtp";
 
 import { Mail } from "lucide-react";
 import loadingAnimation from "@/lottie/formLoadingAnimation.json";
@@ -25,7 +25,7 @@ export default function verifyAccount() {
   const [formState, formAction, isPending] = useActionState<
     FormState,
     FormData
-  >(useVerifyAccount, {
+  >(VerifyOtp, {
     status: undefined,
     message: "",
     errors: {},

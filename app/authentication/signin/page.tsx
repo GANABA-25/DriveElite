@@ -52,6 +52,14 @@ export default function SignInPage() {
 
     if (formState.status === "success") {
       toast.success(formState.message);
+
+      const email = formState.data?.email;
+      const phoneNumber = formState.data?.phoneNumber;
+      const type = "signin";
+
+      router.push(
+        `/authentication/signin/verifyOtp?email=${encodeURIComponent(email || "")}&phone=${encodeURIComponent(phoneNumber || "")}&type=${encodeURIComponent(type || "")}`,
+      );
     }
 
     if (formState.status === "error") {

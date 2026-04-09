@@ -122,6 +122,10 @@ export async function signInUser(
     return {
       status: "success",
       message: "OTP sent successfully",
+      data: {
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+      },
     };
   } catch (error) {
     return {

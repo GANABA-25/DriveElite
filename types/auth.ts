@@ -27,6 +27,10 @@ export type SignInFormState = {
   status?: "success" | "error";
   message?: string;
   errors?: Partial<Record<keyof SignInDataTypes, string>>;
+  data?: {
+    email?: string;
+    phoneNumber?: string;
+  };
 };
 
 export interface verifyEmailDataTypes {
