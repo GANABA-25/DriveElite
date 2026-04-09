@@ -1,10 +1,10 @@
 "use server";
+
+import axios from "axios";
 import Profile from "@/models/profile";
 import bcrypt from "bcryptjs";
 import { validateSignUpData } from "@/util/validation";
 import connectionToDataBase from "../monogdb";
-import { sendEmail } from "../sendEmail";
-import crypto from "crypto";
 
 import { FormState } from "@/types/auth";
 import formatPhoneNumber from "@/util/phoneNumberFormatter";
@@ -45,7 +45,35 @@ export async function createUser(
 
     const hashedPassword = await bcrypt.hash(signUpData.password, 12);
     const formattedPhoneNumber = formatPhoneNumber(signUpData.phoneNumber);
-    const verificationToken = crypto.randomBytes(32).toString("hex");
+
+    const data = {
+      expiry: 5,
+      length: 6,
+      medium: "sms",
+      message: `DriveElite Sign in Verification. Your verification code is %otp_code%. This code expires in 5 minutes. Do not share this code with anyone.`,
+      number: formattedPhoneNumber,
+      sender_id: "DriveElite",
+      type: "numeric",
+    };
+
+    const headers = {
+      "api-key": process.env.NEXT_PUBLIC_ARKESEL_API_KEY,
+    };
+
+    const response = await axios.post(
+      "https://sms.arkesel.com/api/otp/generate",
+      data,
+      { headers },
+    );
+
+    if (!response.data || response.data.code !== "1000") {
+      console.log(response.data);
+      return {
+        status: "error",
+        message: "Failed to send SMS OTP. Try again later.",
+        details: response.data,
+      };
+    }
 
     const newProfile = new Profile({
       firstName: signUpData.firstName,
@@ -53,51 +81,18 @@ export async function createUser(
       email: signUpData.email,
       phoneNumber: formattedPhoneNumber,
       password: hashedPassword,
-      verificationToken,
-      verificationTokenExpires: Date.now() + 24 * 60 * 60 * 1000,
       isVerified: false,
     });
-    await newProfile.save();
 
-    await sendEmail({
-      to: signUpData.email,
-      subject: "Verify Your DriveElite Account ✅",
-      text: `DriveElite Email Verification
-    
-    Your verification link:
-    ${process.env.FRONTEND_URL}/verifyEmail?token=${verificationToken}&email=${signUpData.email}
-    
-    This link expires in 24 hours.
-    Do not share this link with anyone.`,
-      html: `
-        <div style="font-family:Arial;">
-          <h2>Hello ${signUpData.firstName} 👋</h2>
-          <p>Thank you for signing up at <b>DriveElite</b>.</p>
-    
-          <p>Please verify your email by clicking the button below:</p>
-    
-          <a href="${process.env.NEXT_PUBLIC_VERIFY_EMAIL_URI}/verifyEmail?token=${verificationToken}&email=${signUpData.email}"
-            style="
-              background:#FACC15;
-              padding:12px 20px;
-              text-decoration:none;
-              font-weight:bold;
-              border-radius:6px;
-              color:#000;
-              display:inline-block;
-            ">
-            Verify Email
-          </a>
-    
-          <p>This link expires in 24 hours.</p>
-          <p>If you didn't create this account, ignore this email.</p>
-        </div>
-      `,
-    });
+    await newProfile.save();
 
     return {
       status: "success",
       message: "Account created. Please verify your email.",
+      data: {
+        email: signUpData.email,
+        phoneNumber: formattedPhoneNumber,
+      },
     };
   } catch (error) {
     console.log(error);

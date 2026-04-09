@@ -36,13 +36,6 @@ const profileSchema = new mongoose.Schema(
       default: "user",
     },
 
-    verificationToken: {
-      type: String,
-    },
-    verificationTokenExpires: {
-      type: Date,
-    },
-
     isVerified: {
       type: Boolean,
       default: false,

@@ -11,6 +11,10 @@ export type FormState = {
   status?: "success" | "error";
   message?: string;
   errors?: Partial<Record<keyof FormDataTypes, string>>;
+  data?: {
+    email?: string;
+    phoneNumber?: string;
+  };
 };
 
 export interface SignInDataTypes {

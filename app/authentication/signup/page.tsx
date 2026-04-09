@@ -1,9 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import Link from "next/link";
 import Input from "@/components/input";
 import { useActionState, useState, useEffect } from "react";
 import { createUser } from "@/lib/profile/createUser";
+
 import Lottie from "lottie-react";
 import { toast } from "react-toastify";
 
@@ -22,6 +25,7 @@ type ErrorType = Partial<Record<keyof FormDataTypes, string>>;
 type TouchedType = Partial<Record<keyof FormDataTypes, boolean>>;
 
 export default function SignUpPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<ErrorType>({});
@@ -91,6 +95,13 @@ export default function SignUpPage() {
         confirmPassword: "",
       });
       toast.success(formState.message);
+
+      const email = formState.data?.email;
+      const phoneNumber = formState.data?.phoneNumber;
+
+      router.push(
+        `/authentication/verifyAccount?email=${encodeURIComponent(email || "")}&phone=${encodeURIComponent(phoneNumber || "")}`,
+      );
     }
 
     if (formState.status === "error") {
