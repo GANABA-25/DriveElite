@@ -16,8 +16,8 @@ import { signInUser } from "@/lib/profile/signInUser";
 import loadingAnimation from "@/lottie/formLoadingAnimation.json";
 import { Mail, Phone } from "lucide-react";
 
-import { SignInDataTypes } from "@/types/auth";
-import { SignInFormState } from "@/types/auth";
+import { SignInDataTypes } from "@/@types/auth";
+import { SignInFormState } from "@/@types/auth";
 
 interface ErrorMsgType {
   email?: string;

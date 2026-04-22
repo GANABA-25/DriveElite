@@ -18,8 +18,8 @@ import FormError from "../../../components/formError";
 import loadingAnimation from "../../../lottie/formLoadingAnimation.json";
 import FeatureItem from "@/components/featureItem";
 
-import { FormDataTypes } from "@/types/auth";
-import { FormState } from "@/types/auth";
+import { FormDataTypes } from "@/@types/auth";
+import { FormState } from "@/@types/auth";
 
 type ErrorType = Partial<Record<keyof FormDataTypes, string>>;
 type TouchedType = Partial<Record<keyof FormDataTypes, boolean>>;

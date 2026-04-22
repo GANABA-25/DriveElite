@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import Input from "@/components/input";
 import { Binary } from "lucide-react";
 import Lottie from "lottie-react";
-import { FormState } from "@/types/auth";
+import { FormState } from "@/@types/auth";
 import { useVerifyAccount } from "@/lib/profile/useVerifyAccount";
 
 import { Mail } from "lucide-react";

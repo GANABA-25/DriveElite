@@ -7,10 +7,10 @@ interface VehicleData {
   category: string;
   imageUrl: string;
   name: string;
-  seats: string;
+  seats: number;
   fuel: string;
   speed: string;
-  price: string;
+  price: number;
 }
 
 export default function VehicleCard({ data }: { data: VehicleData }) {

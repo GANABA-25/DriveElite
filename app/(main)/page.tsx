@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import Button from "@/components/button";
 import { MoveRight, MapPin, Calendar, Car, Key } from "lucide-react";
@@ -12,8 +10,8 @@ import {
   Award,
 } from "lucide-react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-import { getUri } from "@/util/https";
+
+import { getFleets } from "@/lib/fleets/getFleets";
 
 import VehicleCardSkeleton from "@/components/VehicleCardSkeleton";
 import VehicleCard from "@/components/vehicle-card";
@@ -104,16 +102,29 @@ const featuresData = [
   },
 ];
 
-export default function Home() {
-  const {
-    data = [],
-    isPending,
-    isError,
-    refetch,
-  } = useQuery({
-    queryKey: ["featuredVehicles"],
-    queryFn: () => getUri(process.env.NEXT_PUBLIC_FETCH_FEATURED_VEHICLES_URI),
-  });
+interface fleetFiltersDataTypes {
+  _id: string;
+  name: string;
+  category: string;
+  price: number;
+  imageUrl: string;
+  seats: number;
+  fuel: string;
+  speed: string;
+  description: string;
+  features: string[];
+  specs: {
+    engine: string;
+    transmission: string;
+    horsepower: string;
+    acceleration: string;
+    fuelEconomy: string;
+    trunk: string;
+  };
+}
+
+export default async function Home() {
+  const fleets = await getFleets();
 
   return (
     <div className="">
@@ -215,18 +226,18 @@ export default function Home() {
           </div>
         </div>
 
-        {isPending && (
+        {/* {isPending && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {Array.from({ length: 4 }).map((_, i) => (
               <VehicleCardSkeleton key={i} />
             ))}
           </div>
-        )}
+        )} */}
 
-        {isError && (
+        {/* {isError && (
           <div className="flex items-center justify-center px-4 py-24">
             <div className="flex flex-col items-center text-center max-w-md w-full bg-white shadow-md rounded-2xl p-8 border border-gray-100">
-              {/* <Lottie className="w-32 h-32" animationData={Error404} loop /> */}
+             
 
               <h2 className="mt-4 text-2xl font-bold text-gray-800">
                 Unable to connect
@@ -245,15 +256,13 @@ export default function Home() {
               </Button>
             </div>
           </div>
-        )}
+        )} */}
 
-        {!isPending && !isError && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {data.map((car) => (
-              <VehicleCard key={car._id} data={car} />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {fleets.slice(0, 4).map((car: fleetFiltersDataTypes) => (
+            <VehicleCard key={car._id} data={car} />
+          ))}
+        </div>
       </section>
 
       <section className="max-w-360 mx-auto flex flex-col gap-14 px-4 lg:px-0 pt-35">

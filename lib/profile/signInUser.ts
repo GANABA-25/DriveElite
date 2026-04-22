@@ -6,7 +6,7 @@ import { validateSignInData } from "@/util/validation";
 import { sendEmail } from "../sendEmail";
 import axios from "axios";
 
-import { SignInFormState } from "@/types/auth";
+import { SignInFormState } from "@/@types/auth";
 import formatPhoneNumber from "@/util/phoneNumberFormatter";
 
 export async function signInUser(

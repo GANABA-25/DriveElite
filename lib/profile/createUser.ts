@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import { validateSignUpData } from "@/util/validation";
 import connectionToDataBase from "../monogdb";
 
-import { FormState } from "@/types/auth";
+import { FormState } from "@/@types/auth";
 import formatPhoneNumber from "@/util/phoneNumberFormatter";
 
 export async function createUser(

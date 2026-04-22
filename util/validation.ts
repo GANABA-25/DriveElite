@@ -1,5 +1,5 @@
-import { FormDataTypes } from "@/types/auth";
-import { SignInDataTypes } from "@/types/auth";
+import { FormDataTypes } from "@/@types/auth";
+import { SignInDataTypes } from "@/@types/auth";
 
 export const validateSignUpData = (signUpData: FormDataTypes) => {
   const { firstName, lastName, email, phoneNumber, password, confirmPassword } =
