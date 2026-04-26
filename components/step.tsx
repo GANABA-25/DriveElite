@@ -2,10 +2,11 @@ import type { ReactNode } from "react";
 
 interface stepDataTypes {
   icon: ReactNode;
-  number: number;
+  number: string;
   title: string;
-  text: string;
+  text: React.ReactNode;
 }
+
 export default function Step({ icon, number, title, text }: stepDataTypes) {
   return (
     <div className="relative flex flex-col items-center text-center">

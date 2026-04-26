@@ -1,7 +1,6 @@
 import { getFleets } from "@/lib/fleets/getFleets";
 import { Suspense } from "react";
 import FleetFilters from "./fleetFilters";
-import VehicleCardSkeleton from "@/components/VehicleCardSkeleton";
 import LoadingCard from "@/components/loadingCard";
 
 export default async function FleetPage() {

@@ -1,0 +1,111 @@
+import { useState } from "react";
+
+import { Check } from "lucide-react";
+
+type ExtraKey = "gps" | "childSeat" | "additionalDriver" | "fullInsurance";
+
+export default function LastStep() {
+  const [checked, setChecked] = useState<Record<ExtraKey, boolean>>({
+    gps: false,
+    childSeat: false,
+    additionalDriver: false,
+    fullInsurance: false,
+  });
+  const extras: {
+    key: ExtraKey;
+    label: string;
+    price: number;
+    desc: string;
+  }[] = [
+    { key: "gps", label: "GPS Navigation", price: 10, desc: "Never get lost" },
+    {
+      key: "childSeat",
+      label: "Child Seat",
+      price: 15,
+      desc: "Safety first for kids",
+    },
+    {
+      key: "additionalDriver",
+      label: "Additional Driver",
+      price: 20,
+      desc: "Share the driving",
+    },
+    {
+      key: "fullInsurance",
+      label: "Full Insurance",
+      price: 35,
+      desc: "Complete peace of mind",
+    },
+  ];
+  return (
+    <div className="flex flex-col gap-4">
+      <h1 className="text-lg md:text-2xl font-bold">Extras & Review</h1>
+
+      <div className="flex flex-col gap-4">
+        {extras.map((extra) => (
+          <div
+            key={extra.key}
+            role="checkbox"
+            aria-checked={checked[extra.key]}
+            tabIndex={0}
+            className={`md:w-165 lg:w-225 flex justify-between items-center border p-4 rounded-md cursor-pointer transition-all ${
+              checked[extra.key]
+                ? "border-primary bg-primary/20"
+                : "border-gray-200 hover:border-primary"
+            }`}
+            onClick={() =>
+              setChecked({
+                ...checked,
+                [extra.key]: !checked[extra.key],
+              })
+            }
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setChecked({
+                  ...checked,
+                  [extra.key]: !checked[extra.key],
+                });
+              }
+            }}
+          >
+            <div className="flex items-center gap-4">
+              <div
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                  checked[extra.key]
+                    ? "bg-yellow-400 border-yellow-400"
+                    : "border-gray-400"
+                }`}
+              >
+                {checked[extra.key] && <Check className="w-3 h-3 text-white" />}
+              </div>
+
+              <div>
+                <h1 className="text-sm md:text-base">{extra.label}</h1>
+                <p className="text-gray-500 text-xs md:text-sm">{extra.desc}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <h1 className="text-sm md:text-base">
+                <span className="font-bold">+${extra.price}</span>/day
+              </h1>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="border-t border-gray-200 p-4 flex flex-col gap-4">
+        <h1 className="text-base font-bold">Booking Summary</h1>
+
+        <ul className="text-gray-500 flex flex-col gap-2">
+          <li>Pickup</li>
+          <li>Return</li>
+          <li>Pickup Location</li>
+          <li>Return Location</li>
+          <li>Driver</li>
+        </ul>
+      </div>
+    </div>
+  );
+}

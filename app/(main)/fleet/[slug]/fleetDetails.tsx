@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Users,
   Fuel,
@@ -13,9 +11,7 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 
-import VehicleCardSkeleton from "@/components/VehicleCardSkeleton";
 import Image from "next/image";
 import Button from "@/components/button";
 import { fleetFiltersDataTypes } from "@/@types/fleet.types";
@@ -26,23 +22,6 @@ type Props = {
 };
 
 export default function FleetDetailsClient({ slug, fleets }: Props) {
-  //   const { data, isPending, isError, error } = useQuery({
-  //     queryKey: ["fleets"],
-  //     queryFn: () => getUri(process.env.NEXT_PUBLIC_FETCH_FLEETS_URI),
-  //   });
-
-  //   if (isPending) {
-  //     return (
-  //       <div className="flex justify-center items-center">
-  //         <h1 className="text-3xl font-black text-primary">Loading fleet .....</h1>
-  //       </div>
-  //     );
-  //   }
-
-  //   if (isError) {
-  //     return <p>Something went wrong</p>;
-  //   }
-
   const fleet = fleets?.find((car: fleetFiltersDataTypes) => car._id === slug);
 
   if (!fleet) {
