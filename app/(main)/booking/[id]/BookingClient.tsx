@@ -4,8 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import { ArrowRight, ArrowLeft, Car } from "lucide-react";
+import { ArrowRight, ArrowLeft, Car, Check } from "lucide-react";
 
+import { bookingDataTypes } from "@/@types/auth";
 import Button from "@/components/button";
 import FirstStep from "../components/firstStep";
 import SecondStep from "../components/secondStep";
@@ -23,8 +24,29 @@ type Step = "firstStep" | "secondStep" | "lastStep";
 
 export default function BookingClient({ car }: { car: Car }) {
   const [step, setStep] = useState<Step>("firstStep");
-
   const steps: Step[] = ["firstStep", "secondStep", "lastStep"];
+  const [bookingData, setBookingData] = useState<bookingDataTypes>({
+    pickupDate: "",
+    returnDate: "",
+    pickupTime: "",
+    returnTime: "",
+    pickupLocation: "",
+    returnLocation: "",
+
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    ghanaCard: "",
+    driverLicense: "",
+
+    extras: {
+      gps: false,
+      childSeat: false,
+      additionalDriver: false,
+      fullInsurance: false,
+    },
+  });
 
   const nextStep = () => {
     const index = steps.indexOf(step);
@@ -45,21 +67,22 @@ export default function BookingClient({ car }: { car: Car }) {
       <header className="flex justify-around items-center mb-10">
         <div className="flex flex-col items-center gap-2">
           <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-primary rounded-full text-sm md:text-2xl font-bold">
-            1
+            {step === "firstStep" ? 1 : <Check />}
           </div>
+
           <p className="text-xs md:text-base text-gray-500">Date & Location</p>
         </div>
 
         <div className="flex flex-col items-center gap-2">
           <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-primary rounded-full text-sm md:text-2xl font-bold">
-            2
+            {step === "secondStep" ? 2 : step === "lastStep" ? <Check /> : 2}
           </div>
           <p className="text-xs md:text-base text-gray-500">Your Details</p>
         </div>
 
         <div className="flex flex-col items-center gap-2">
           <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-primary rounded-full text-sm md:text-2xl font-bold">
-            3
+            {step === "lastStep" ? 3 : 3}
           </div>
           <p className="text-xs md:text-base text-gray-500">Extra & Reviews</p>
         </div>
@@ -67,36 +90,30 @@ export default function BookingClient({ car }: { car: Car }) {
 
       <section className="max-w-360 mx-auto flex flex-col lg:flex-row gap-8">
         <div className="flex-1 flex flex-col gap-4 border border-gray-200 p-4 md:p-8 rounded-md">
-          {step === "firstStep" && <FirstStep />}
+          {step === "firstStep" && (
+            <FirstStep
+              nextStep={nextStep}
+              bookingData={bookingData}
+              setBookingData={setBookingData}
+            />
+          )}
 
-          {step === "secondStep" && <SecondStep />}
+          {step === "secondStep" && (
+            <SecondStep
+              nextStep={nextStep}
+              prevStep={prevStep}
+              bookingData={bookingData}
+              setBookingData={setBookingData}
+            />
+          )}
 
-          {step === "lastStep" && <LastStep />}
-
-          <div className="flex justify-between items-center">
-            <Button
-              onClick={prevStep}
-              className="flex items-center gap-4 border border-gray-200 py-2 px-4 rounded-md font-bold"
-            >
-              <ArrowLeft size={15} /> Back
-            </Button>
-
-            {step === "lastStep" ? (
-              <Link
-                href={`/payment/${car._id}`}
-                className="flex items-center gap-2 px-4 py-2 rounded-md text-base text-center font-bold transition-transform duration-200 ease-in-out lg:hover:cursor-pointer bg-primary text-black hover:bg-yellow-500 hover:scale-105"
-              >
-                Proceed to payment <ArrowRight size={15} />
-              </Link>
-            ) : (
-              <Button
-                onClick={nextStep}
-                className="flex items-center gap-4 border border-gray-200 bg-primary py-2 px-4 rounded-md font-bold"
-              >
-                Continue <ArrowRight size={15} />
-              </Button>
-            )}
-          </div>
+          {step === "lastStep" && (
+            <LastStep
+              prevStep={prevStep}
+              bookingData={bookingData}
+              setBookingData={setBookingData}
+            />
+          )}
         </div>
 
         <div className="sticky lg:top-24 h-fit w-full lg:w-110 border border-gray-200 p-6 rounded-md flex flex-col gap-4">
@@ -107,6 +124,7 @@ export default function BookingClient({ car }: { car: Car }) {
               fill
               className="object-cover"
               priority
+              sizes="fit"
             />
           </div>
 

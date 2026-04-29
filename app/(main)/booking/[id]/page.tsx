@@ -1,5 +1,6 @@
 import { getFleets } from "@/lib/fleets/getFleets";
 import BookingClient from "./BookingClient";
+import { fleetFiltersDataTypes } from "@/@types/fleet.types";
 
 export default async function BookingPage({
   params,
@@ -10,9 +11,9 @@ export default async function BookingPage({
 
   const fleets = await getFleets();
 
-  console.log("checking params", id);
-
-  const car = fleets.find((c) => c._id.toString() === id);
+  const car = fleets.find(
+    (c: fleetFiltersDataTypes) => c._id.toString() === id,
+  );
 
   if (!car) return <p>Car not found</p>;
 

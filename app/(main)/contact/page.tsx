@@ -1,10 +1,106 @@
-import { Send, BookOpenCheck, Mail, Phone } from "lucide-react";
+"use client";
+import loadingAnimation from "../../../lottie/formLoadingAnimation.json";
+import Lottie from "lottie-react";
 
+import { BookOpenCheck, Mail, Phone } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
+import { contactUs } from "@/lib/contact/contactUs";
+import { toast } from "react-toastify";
+
+import { validateContactMessageData } from "@/util/validation";
 import ContactCard from "./contact-card";
 import Input from "@/components/input";
-import Button from "@/components/button";
+import { contactFormSate, contactUsDataTypes } from "@/@types/auth";
+import FormError from "@/components/formError";
+
+type ErrorType = Partial<Record<keyof contactUsDataTypes, string>>;
+type TouchedType = Partial<Record<keyof contactUsDataTypes, boolean>>;
 
 export default function ContactPage() {
+  const [touched, setTouched] = useState<TouchedType>({});
+  const [errors, setErrors] = useState<ErrorType>({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formState, formAction, isPending] = useActionState<
+    contactFormSate,
+    FormData
+  >(contactUs, {
+    status: undefined,
+    message: "",
+    errors: {},
+  });
+
+  const [contactMessageData, setContactMessageData] =
+    useState<contactUsDataTypes>({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      subject: "",
+      message: "",
+    });
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    const { name, value } = e.target;
+
+    const updatedValues = {
+      ...contactMessageData,
+      [name]: value,
+    };
+
+    setContactMessageData(updatedValues);
+
+    if (value.trim() === "") {
+      setTouched((prev) => ({
+        ...prev,
+        [name]: false,
+      }));
+
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+
+      return;
+    }
+
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+
+    const validationErrors = validateContactMessageData(updatedValues);
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: validationErrors[name as keyof contactUsDataTypes],
+    }));
+  };
+
+  useEffect(() => {
+    if (!formState?.message) return;
+
+    if (formState.status === "success") {
+      setContactMessageData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phoneNumber: "",
+        subject: "",
+        message: "",
+      });
+      toast.success(formState.message);
+    }
+
+    if (formState.status === "error") {
+      setErrors(formState.errors || {});
+      toast.error(formState.message);
+    }
+  }, [formState]);
+
   return (
     <>
       <header className="flex flex-col gap-4 text-center py-20 px-4 lg:px-0">
@@ -32,67 +128,169 @@ export default function ContactPage() {
           </p>
         </div>
 
-        <form className="flex justify-center items-center gap-4">
+        <form
+          action={(formData) => {
+            setIsSubmitted(true);
+            return formAction(formData);
+          }}
+          className="flex justify-center items-center gap-4"
+        >
           <div className="w-200 p-8 flex flex-col gap-4 border border-gray-200 rounded-md shadow-md">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                icon={<BookOpenCheck size={15} />}
-                type="name"
-                placeholder="John"
-                label="First Name"
-              />
-              <Input
-                icon={<BookOpenCheck size={15} />}
-                type="name"
-                placeholder="Doe"
-                label="Last Name"
-              />
-              <Input
-                icon={<Mail size={15} />}
-                type="email"
-                placeholder="John@email.com"
-                label="Email"
-              />
-              <Input
-                icon={<Phone size={15} />}
-                type="phone"
-                placeholder="+233 59-649-8006"
-                label="Phone"
-              />
+              <div className="flex flex-col gap-2">
+                <Input
+                  icon={<BookOpenCheck size={15} />}
+                  type="text"
+                  name="firstName"
+                  placeholder="John"
+                  label="First Name"
+                  value={contactMessageData.firstName}
+                  onChange={handleChange}
+                  hasError={
+                    ((touched.firstName || isSubmitted) && errors?.firstName) ||
+                    undefined
+                  }
+                />
+                <FormError
+                  message={
+                    ((touched.firstName || isSubmitted) && errors?.firstName) ||
+                    undefined
+                  }
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Input
+                  icon={<BookOpenCheck size={15} />}
+                  type="text"
+                  name="lastName"
+                  placeholder="Doe"
+                  label="Last Name"
+                  value={contactMessageData.lastName}
+                  onChange={handleChange}
+                  hasError={
+                    ((touched.lastName || isSubmitted) && errors?.lastName) ||
+                    undefined
+                  }
+                />
+                <FormError
+                  message={
+                    ((touched.lastName || isSubmitted) && errors?.lastName) ||
+                    undefined
+                  }
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Input
+                  icon={<Mail size={15} />}
+                  type="email"
+                  name="email"
+                  placeholder="John@email.com"
+                  label="Email"
+                  value={contactMessageData.email}
+                  onChange={handleChange}
+                  hasError={
+                    ((touched.email || isSubmitted) && errors?.email) ||
+                    undefined
+                  }
+                />
+                <FormError
+                  message={
+                    ((touched.email || isSubmitted) && errors?.email) ||
+                    undefined
+                  }
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Input
+                  icon={<Phone size={15} />}
+                  type="tel"
+                  name="phoneNumber"
+                  placeholder="+233 59-649-8006"
+                  label="Phone"
+                  value={contactMessageData.phoneNumber}
+                  onChange={handleChange}
+                  hasError={
+                    ((touched.phoneNumber || isSubmitted) &&
+                      errors?.phoneNumber) ||
+                    undefined
+                  }
+                />
+                <FormError
+                  message={
+                    ((touched.phoneNumber || isSubmitted) &&
+                      errors?.phoneNumber) ||
+                    undefined
+                  }
+                />
+              </div>
             </div>
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-4 text-base">
+              <div className="flex flex-col gap-2 text-base">
                 <label className=" text-gray-600">Select</label>
-
                 <select
                   name="subject"
-                  className="w-full bg-grayDark rounded-sm border border-gray-300 p-2 md:p-4 lg:p-2 focus:outline-none focus:ring-2 focus:ring-opacity-30 focus:ring-[#FACC15]"
-                  defaultValue=""
+                  value={contactMessageData.subject}
+                  onChange={handleChange}
+                  className={`w-full bg-grayDark rounded-sm border p-2 md:p-4 lg:p-2 focus:outline-none focus:ring-2 focus:ring-opacity-30 focus:ring-[#FACC15] ${
+                    errors?.subject ? "border-red-500" : "border-gray-300"
+                  }`}
                 >
                   <option value="" disabled>
-                    Select an Subject
+                    Select a Subject
                   </option>
                   <option value="booking_enquiry">Booking Enquiry</option>
                   <option value="customer_support">Customer Support</option>
                   <option value="partnership">Partnership</option>
                   <option value="other">Other</option>
                 </select>
-              </div>
-
-              <div className="flex flex-col gap-4 text-base">
-                <label className="text-sm text-gray-600">Message</label>
-                <textarea
-                  className="w-full bg-grayDark rounded-sm border border-gray-300 p-2 md:p-4 lg:p-2 focus:outline-none focus:ring-2 focus:ring-opacity-30 focus:ring-[#FACC15]"
-                  type="textarea"
-                  placeholder="How can we help you?"
-                  rows={5}
+                <FormError
+                  message={
+                    ((touched.subject || isSubmitted) && errors?.subject) ||
+                    undefined
+                  }
                 />
               </div>
 
-              <Button className="w-full flex justify-center items-center gap-4 p-2 rounded-md bg-primary font-bold text-base">
-                <Send size={20} />
-                Send Message
-              </Button>
+              <div className="flex flex-col gap-2 text-base">
+                <label className="text-sm text-gray-600">Message</label>
+                <textarea
+                  name="message"
+                  value={contactMessageData.message}
+                  onChange={handleChange}
+                  rows={5}
+                  placeholder="How can we help you?"
+                  className={`w-full bg-grayDark rounded-sm border p-2 md:p-4 lg:p-2 focus:outline-none focus:ring-2 focus:ring-opacity-30 focus:ring-[#FACC15] ${
+                    errors?.message ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                <FormError
+                  message={
+                    ((touched.message || isSubmitted) && errors?.message) ||
+                    undefined
+                  }
+                />
+              </div>
+
+              <button
+                type="submit"
+                className={`p-2 bg-primary text-accent font-bold lg:hover:bg-primary/80 rounded-md shadow-xs ${
+                  isPending ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+                }`}
+              >
+                {isPending ? (
+                  <div className="flex justify-center ">
+                    <Lottie
+                      className="w-18 lg:w-18"
+                      animationData={loadingAnimation}
+                      loop={true}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex justify-center items-center gap-2">
+                    Send Message
+                  </div>
+                )}
+              </button>
             </div>
           </div>
         </form>

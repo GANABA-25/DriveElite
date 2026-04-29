@@ -1,23 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-
 import Link from "next/link";
-import Input from "@/components/input";
-import { useActionState, useState, useEffect } from "react";
-import { createUser } from "@/lib/profile/createUser";
-
 import Lottie from "lottie-react";
 import { toast } from "react-toastify";
 
 import { Mail, Phone, Lock, User, Car, Shield, Star, Zap } from "lucide-react";
 
+import Input from "@/components/input";
 import { validateSignUpData } from "../../../util/validation";
 import FormError from "../../../components/formError";
 // import loadingAnimation from "@/lottie/formLoadingAnimation.json";
 import loadingAnimation from "../../../lottie/formLoadingAnimation.json";
 import FeatureItem from "@/components/featureItem";
-
+import { useActionState, useState, useEffect } from "react";
+import { createUser } from "@/lib/profile/createUser";
 import { FormDataTypes } from "@/@types/auth";
 import { FormState } from "@/@types/auth";
 
@@ -79,7 +76,10 @@ export default function SignUpPage() {
 
     const validationErrors = validateSignUpData(updatedValues);
 
-    setErrors(validationErrors);
+    setErrors((prev) => ({
+      ...prev,
+      [name]: validationErrors[name as keyof FormDataTypes],
+    }));
   };
 
   useEffect(() => {
@@ -96,8 +96,8 @@ export default function SignUpPage() {
       });
       toast.success(formState.message);
 
-      const email = formState.data?.email;
-      const phoneNumber = formState.data?.phoneNumber;
+      const email = formState.profile?.email;
+      const phoneNumber = formState.profile?.phoneNumber;
 
       router.push(
         `/authentication/verifyAccount?email=${encodeURIComponent(email || "")}&phone=${encodeURIComponent(phoneNumber || "")}`,

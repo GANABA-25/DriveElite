@@ -89,9 +89,13 @@ export async function createUser(
     return {
       status: "success",
       message: "Account created. Please verify your email.",
-      data: {
+      profile: {
         email: signUpData.email,
         phoneNumber: formattedPhoneNumber,
+        userId: "",
+        firstName: "",
+        lastName: "",
+        role: "",
       },
     };
   } catch (error) {

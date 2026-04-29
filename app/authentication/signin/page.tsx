@@ -17,7 +17,7 @@ import loadingAnimation from "@/lottie/formLoadingAnimation.json";
 import { Mail, Phone } from "lucide-react";
 
 import { SignInDataTypes } from "@/@types/auth";
-import { SignInFormState } from "@/@types/auth";
+import { FormState } from "@/@types/auth";
 
 interface ErrorMsgType {
   email?: string;
@@ -35,7 +35,7 @@ export default function SignInPage() {
   });
 
   const [formState, formAction, isPending] = useActionState<
-    SignInFormState,
+    FormState,
     FormData
   >(signInUser, {
     status: undefined,
@@ -53,8 +53,8 @@ export default function SignInPage() {
     if (formState.status === "success") {
       toast.success(formState.message);
 
-      const email = formState.data?.email;
-      const phoneNumber = formState.data?.phoneNumber;
+      const email = formState.profile?.email;
+      const phoneNumber = formState.profile?.phoneNumber;
       const type = "signin";
 
       router.push(

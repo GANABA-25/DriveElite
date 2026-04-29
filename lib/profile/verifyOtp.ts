@@ -4,13 +4,9 @@ import axios from "axios";
 import jwt from "jsonwebtoken";
 import Profile from "@/models/profile";
 import connectionToDataBase from "../monogdb";
+import { cookies } from "next/headers";
 
-type FormState = {
-  status?: "success" | "error";
-  message?: string;
-  token?: string;
-  errors?: Record<string, string>;
-};
+import { FormState } from "@/@types/auth";
 
 export async function VerifyOtp(
   prevState: FormState,
@@ -95,10 +91,25 @@ export async function VerifyOtp(
         { expiresIn: "7d" },
       );
 
+      (await cookies()).set("auth_token", token, {
+        httpOnly: true,
+        secure: process.env.NEXT_PUBLIC_COOKIES === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
       return {
         status: "success",
         message: "Sign in successfully",
-        token,
+        profile: {
+          userId: user._id.toString(),
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          role: user.role,
+        },
       };
     }
 

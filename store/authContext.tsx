@@ -1,4 +1,5 @@
 "use client";
+
 import {
   createContext,
   useState,
@@ -12,54 +13,44 @@ interface UserData {
   firstName: string;
   lastName: string;
   email: string;
-  phoneNumber: number;
+  phoneNumber: string;
   role: string;
-  token: string;
 }
 
 interface AuthContextType {
   userData: UserData | null;
-  token: string | null;
   isAuthenticated: boolean;
   role: string | null;
   authenticate: (userData: UserData) => void;
   logout: () => void;
 }
 
+import { logoutAction } from "@/lib/profile/logOut";
+
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [authData, setAuthData] = useState<UserData | null>(null);
-  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const storedUser = sessionStorage.getItem("userData");
-    const storedToken = sessionStorage.getItem("token");
-
     if (storedUser) setAuthData(JSON.parse(storedUser));
-    if (storedToken) setToken(storedToken as string);
   }, []);
 
   const authenticate = (userData: UserData) => {
     sessionStorage.setItem("userData", JSON.stringify(userData));
-    sessionStorage.setItem("token", userData.token);
-
     setAuthData(userData);
-    setToken(userData.token);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await logoutAction();
     sessionStorage.removeItem("userData");
-    sessionStorage.removeItem("token");
-
     setAuthData(null);
-    setToken(null);
   };
 
   const value = {
     userData: authData,
-    token,
-    isAuthenticated: !!token,
+    isAuthenticated: !!authData,
     role: authData?.role || null,
     authenticate,
     logout,

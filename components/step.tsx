@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 interface stepDataTypes {
   icon: ReactNode;
-  number: string;
+  number: number;
   title: string;
   text: React.ReactNode;
 }

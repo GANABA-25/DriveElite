@@ -1,10 +1,20 @@
 import { useState } from "react";
-
+import Link from "next/link";
+import Button from "@/components/button";
 import { Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, Car } from "lucide-react";
 
 type ExtraKey = "gps" | "childSeat" | "additionalDriver" | "fullInsurance";
 
-export default function LastStep() {
+type Props = {
+  prevStep: () => void;
+};
+
+export default function LastStep({
+  nextStep,
+  bookingData,
+  setBookingData,
+}: any) {
   const [checked, setChecked] = useState<Record<ExtraKey, boolean>>({
     gps: false,
     childSeat: false,
@@ -105,6 +115,23 @@ export default function LastStep() {
           <li>Return Location</li>
           <li>Driver</li>
         </ul>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <Button
+          // onClick={prevStep}
+          className="flex items-center gap-4 border border-gray-200 py-2 px-4 rounded-md font-bold"
+        >
+          <ArrowLeft size={15} /> Back
+        </Button>
+
+        <Link
+          // href={`/payment/${car._id}`}
+          href={`/payment/`}
+          className="flex items-center gap-2 px-4 py-2 rounded-md text-base text-center font-bold transition-transform duration-200 ease-in-out lg:hover:cursor-pointer bg-primary text-black hover:bg-yellow-500 hover:scale-105"
+        >
+          Proceed to payment <ArrowRight size={15} />
+        </Link>
       </div>
     </div>
   );

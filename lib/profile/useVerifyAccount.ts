@@ -5,13 +5,9 @@ import jwt from "jsonwebtoken";
 import Profile from "@/models/profile";
 import connectionToDataBase from "../monogdb";
 import { sendEmail } from "../sendEmail";
+import { cookies } from "next/headers";
 
-type FormState = {
-  status?: "success" | "error";
-  message?: string;
-  token?: string;
-  errors?: Record<string, string>;
-};
+import { FormState } from "@/@types/auth";
 
 export async function useVerifyAccount(
   prevState: FormState,
@@ -23,8 +19,6 @@ export async function useVerifyAccount(
     const email = formData.get("email") as string;
     const phoneNumber = formData.get("phoneNumber") as string;
     const otp = formData.get("Otp") as string;
-
-    console.log(formData);
 
     if (!email || !phoneNumber || !otp) {
       return {
@@ -105,6 +99,14 @@ export async function useVerifyAccount(
         { expiresIn: "7d" },
       );
 
+      (await cookies()).set("auth_token", token, {
+        httpOnly: true,
+        secure: process.env.NEXT_PUBLIC_COOKIES === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
       await sendEmail({
         to: user.email,
         subject: "Welcome to DriveElite 🚗",
@@ -121,7 +123,14 @@ export async function useVerifyAccount(
       return {
         status: "success",
         message: "Account verified successfully",
-        token,
+        profile: {
+          userId: user._id.toString(),
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          role: user.role,
+        },
       };
     }
 

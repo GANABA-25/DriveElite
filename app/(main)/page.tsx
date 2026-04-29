@@ -13,7 +13,6 @@ import Link from "next/link";
 
 import { getFleets } from "@/lib/fleets/getFleets";
 
-import VehicleCardSkeleton from "@/components/VehicleCardSkeleton";
 import VehicleCard from "@/components/vehicle-card";
 import FeatureCard from "./home/feature-card";
 import Step from "../../components/step";

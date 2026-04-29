@@ -6,13 +6,13 @@ import { validateSignInData } from "@/util/validation";
 import { sendEmail } from "../sendEmail";
 import axios from "axios";
 
-import { SignInFormState } from "@/@types/auth";
+import { FormState } from "@/@types/auth";
 import formatPhoneNumber from "@/util/phoneNumberFormatter";
 
 export async function signInUser(
-  prevSate: SignInFormState,
+  prevSate: FormState,
   formData: FormData,
-): Promise<SignInFormState> {
+): Promise<FormState> {
   try {
     await connectionToDataBase();
 
@@ -110,7 +110,6 @@ export async function signInUser(
       );
 
       if (!response.data || response.data.code !== "1000") {
-        console.log(response.data);
         return {
           status: "error",
           message: "Failed to send SMS OTP. Try again later.",
@@ -122,9 +121,13 @@ export async function signInUser(
     return {
       status: "success",
       message: "OTP sent successfully",
-      data: {
+      profile: {
         email: user.email,
         phoneNumber: user.phoneNumber,
+        userId: "",
+        firstName: "",
+        lastName: "",
+        role: "",
       },
     };
   } catch (error) {

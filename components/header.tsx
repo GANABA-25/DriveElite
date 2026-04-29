@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Car, CircleUser } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "../store/authContext";
-import Image from "next/image";
 
 import NavLinks from "./nav-links";
 import Accordion from "./ui/accordion";
@@ -14,7 +13,8 @@ import Modal from "../components/ui/modal";
 import UpdateProfile from "../app/authentication/updateProfile";
 
 export default function Header() {
-  const { token } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
+
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -34,10 +34,10 @@ export default function Header() {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            {token ? (
+            {isAuthenticated ? (
               <div
                 onClick={() => setOpen(true)}
-                className="bg-accent p-2 rounded-full"
+                className="bg-primary p-2 rounded-full"
               >
                 <CircleUser className="text-white" />
               </div>
@@ -50,9 +50,13 @@ export default function Header() {
               </Link>
             )}
 
-            <Link href="/fleet">
-              <Button>Book Now</Button>
-            </Link>
+            {isAuthenticated ? (
+              <Button onClick={logout}>sign out</Button>
+            ) : (
+              <Link href="/fleet">
+                <Button>Book Now</Button>
+              </Link>
+            )}
           </div>
 
           <div className="md:hidden">

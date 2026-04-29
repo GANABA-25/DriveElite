@@ -14,8 +14,10 @@ import { VerifyOtp } from "@/lib/profile/verifyOtp";
 
 import { Mail } from "lucide-react";
 import loadingAnimation from "@/lottie/formLoadingAnimation.json";
+import { useAuth } from "@/store/authContext";
 
 export default function verifyAccount() {
+  const { authenticate } = useAuth();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const phone = searchParams.get("phone");
@@ -34,8 +36,11 @@ export default function verifyAccount() {
   useEffect(() => {
     if (!formState?.message) return;
 
-    if (formState.status === "success") {
+    if (formState.status === "success" && formState.profile) {
       toast.success(formState.message);
+      authenticate({
+        ...formState.profile,
+      });
       router.push("/");
     }
 

@@ -1,62 +1,205 @@
 import Input from "@/components/input";
+import Button from "@/components/button";
+import { bookingDataTypes } from "@/@types/auth";
+import { bookingDataTypesStageTwo } from "@/@types/auth";
+import FormError from "@/components/formError";
+import { validateBookingDataStageTwo } from "@/util/validation";
+import { useState } from "react";
 
 import { Mail, Phone, MapPinHouse, IdCard, User } from "lucide-react";
+import { ArrowRight, ArrowLeft, Car, Check } from "lucide-react";
 
-export default function SecondStep() {
+type Props = {
+  nextStep: () => void;
+  prevStep: () => void;
+  bookingData: bookingDataTypesStageTwo;
+  setBookingData: any;
+};
+
+type ErrorType = Partial<Record<keyof bookingDataTypesStageTwo, string>>;
+type TouchedType = Partial<Record<keyof bookingDataTypesStageTwo, boolean>>;
+
+export default function SecondStep({
+  nextStep,
+  prevStep,
+  bookingData,
+  setBookingData,
+}: Props) {
+  const [errors, setErrors] = useState<ErrorType>({});
+  const [touched, setTouched] = useState<TouchedType>({});
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+
+    const updatedValues = {
+      ...bookingData,
+      [name]: value,
+    };
+
+    setBookingData(updatedValues);
+
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+
+    const validationErrors = validateBookingDataStageTwo(updatedValues);
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: validationErrors[name as keyof bookingDataTypesStageTwo],
+    }));
+  };
+
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    const validationErrors = validateBookingDataStageTwo(bookingData);
+
+    const allTouched: TouchedType = {
+      fullName: true,
+      email: true,
+      phoneNumber: true,
+      address: true,
+      ghanaCard: true,
+      driverLicense: true,
+    };
+
+    setTouched(allTouched);
+    setErrors(validationErrors);
+
+    const hasErrors = Object.values(validationErrors).some((err) => err !== "");
+
+    if (hasErrors) return;
+
+    nextStep();
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-lg md:text-2xl font-bold">Your Details</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Input
-          label="Full Name"
-          type="text"
-          placeholder="John"
-          icon={<User size={15} />}
-        />
+        <div className="flex flex-col gap-2">
+          <Input
+            name="fullName"
+            label="Full Name"
+            type="text"
+            placeholder="John"
+            icon={<User size={15} />}
+            value={bookingData.fullName}
+            onChange={handleChange}
+            hasError={
+              (touched.fullName ? errors?.fullName : undefined) ||
+              errors?.fullName
+            }
+          />
+          <FormError
+            message={(touched.fullName && errors?.fullName) || undefined}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Input
+            name="email"
+            label="Email Address"
+            type="email"
+            placeholder="john@example.com"
+            icon={<Mail size={15} />}
+            onChange={handleChange}
+            hasError={
+              (touched.email ? errors?.email : undefined) || errors?.email
+            }
+          />
+          <FormError message={(touched.email && errors?.email) || undefined} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Input
+            name="phoneNumber"
+            label="Phone Number"
+            type="tel"
+            placeholder="+233 xx xxx xxxx"
+            icon={<Phone size={15} />}
+            onChange={handleChange}
+            hasError={
+              (touched.phoneNumber ? errors?.phoneNumber : undefined) ||
+              errors?.phoneNumber
+            }
+          />
+          <FormError
+            message={(touched.phoneNumber && errors?.phoneNumber) || undefined}
+          />
+        </div>
 
-        <Input
-          label="Email Address"
-          type="email"
-          placeholder="john@example.com"
-          icon={<Mail size={15} />}
-        />
-        <Input
-          label="Phone Number"
-          type="tel"
-          placeholder="+233 xx xxx xxxx"
-          icon={<Phone size={15} />}
-        />
+        <div className="flex flex-col gap-2">
+          <Input
+            name="address"
+            label="Address"
+            type="text"
+            placeholder="eg Ak-320-8463"
+            icon={<MapPinHouse size={15} />}
+            onChange={handleChange}
+            hasError={
+              (touched.address ? errors?.address : undefined) || errors?.address
+            }
+          />
+          <FormError
+            message={(touched.address && errors?.address) || undefined}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Input
+            name="ghanaCard"
+            label="Ghana card Number"
+            type="text"
+            placeholder="eg GHA-739023159-5"
+            icon={<IdCard size={15} />}
+            onChange={handleChange}
+            hasError={
+              (touched.ghanaCard ? errors?.ghanaCard : undefined) ||
+              errors?.ghanaCard
+            }
+          />
+          <FormError
+            message={(touched.ghanaCard && errors?.ghanaCard) || undefined}
+          />
+        </div>
 
-        <Input
-          label="Address"
-          type="text"
-          placeholder="eg Ak-320-8463"
-          icon={<MapPinHouse size={15} />}
-        />
-        <Input
-          label="Ghana card Number"
-          type="text"
-          placeholder="eg GHA-739023159-5"
-          icon={<IdCard size={15} />}
-        />
-
-        <Input
-          type="text"
-          label="Driver's License Number"
-          placeholder="License Number"
-          icon={<IdCard size={15} />}
-        />
+        <div className="flex flex-col gap-2">
+          <Input
+            name="driverLicense"
+            type="text"
+            label="Driver's License Number"
+            placeholder="License Number"
+            icon={<IdCard size={15} />}
+            onChange={handleChange}
+            hasError={
+              (touched.driverLicense ? errors?.driverLicense : undefined) ||
+              errors?.driverLicense
+            }
+          />
+          <FormError
+            message={
+              (touched.driverLicense && errors?.driverLicense) || undefined
+            }
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4 text-base">
-        <label className="font-bold text-sm text-gray-600">
-          Special Requests (Optional)
-        </label>
-        <textarea
-          className="w-full bg-grayDark rounded-sm border border-gray-300 p-2 md:p-4 lg:p-2 focus:outline-none focus:ring-2 focus:ring-opacity-30 focus:ring-[#FACC15]"
-          placeholder="How can we help you?"
-          rows={3}
-        />
+      <div className="flex justify-between items-center">
+        <Button
+          onClick={prevStep}
+          className="flex items-center gap-4 border border-gray-200 py-2 px-4 rounded-md font-bold cursor-pointer lg:hover:border-primary"
+        >
+          <ArrowLeft size={15} /> Back
+        </Button>
+
+        <Button
+          onClick={handleSubmit}
+          className="flex items-center gap-4 border border-gray-200 bg-primary py-2 px-4 rounded-md font-bold"
+        >
+          Continue <ArrowRight size={15} />
+        </Button>
       </div>
     </div>
   );

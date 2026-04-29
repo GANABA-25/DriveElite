@@ -11,10 +11,15 @@ export type FormState = {
   status?: "success" | "error";
   message?: string;
   errors?: Partial<Record<keyof FormDataTypes, string>>;
-  data?: {
-    email?: string;
-    phoneNumber?: string;
+  profile?: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    role: string;
   };
+  details?: {};
 };
 
 export interface SignInDataTypes {
@@ -36,4 +41,64 @@ export type SignInFormState = {
 export interface verifyEmailDataTypes {
   token: string;
   email: string;
+}
+
+export interface contactFormSate {
+  status?: "success" | "error";
+  message?: string;
+  errors?: Partial<Record<keyof FormDataTypes, string>>;
+}
+
+export interface contactUsDataTypes {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  subject: string;
+  message: string;
+}
+
+export interface bookingDataTypes {
+  pickupDate: string;
+  returnDate: string;
+  pickupTime: string;
+  returnTime: string;
+  pickupLocation: string;
+  returnLocation: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  ghanaCard: string;
+  driverLicense: string;
+  extras: {
+    gps: boolean;
+    childSeat: boolean;
+    additionalDriver: boolean;
+    fullInsurance: boolean;
+  };
+}
+
+export interface bookingDataTypesStageOne {
+  pickupDate: string;
+  returnDate: string;
+  pickupTime: string;
+  returnTime: string;
+  pickupLocation: string;
+  returnLocation: string;
+}
+
+export interface bookingDataTypesStageTwo {
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  ghanaCard: string;
+  driverLicense: string;
+  // extras?: {
+  //   gps?: boolean;
+  //   childSeat?: boolean;
+  //   additionalDriver?: boolean;
+  //   fullInsurance?: boolean;
+  // };
 }

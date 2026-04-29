@@ -11,6 +11,7 @@ import { Binary } from "lucide-react";
 import Lottie from "lottie-react";
 import { FormState } from "@/@types/auth";
 import { useVerifyAccount } from "@/lib/profile/useVerifyAccount";
+import { useAuth } from "@/store/authContext";
 
 import { Mail } from "lucide-react";
 import loadingAnimation from "@/lottie/formLoadingAnimation.json";
@@ -21,6 +22,7 @@ export default function verifyAccount() {
   const phone = searchParams.get("phone");
   const router = useRouter();
   const [otp, setOtp] = useState("");
+  const { authenticate } = useAuth();
 
   const [formState, formAction, isPending] = useActionState<
     FormState,
@@ -34,8 +36,9 @@ export default function verifyAccount() {
   useEffect(() => {
     if (!formState?.message) return;
 
-    if (formState.status === "success") {
-      toast.success(formState.message);
+    if (formState.status === "success" && formState.profile) {
+      authenticate(formState.profile);
+
       router.push("/");
     }
 
