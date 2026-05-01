@@ -71,6 +71,7 @@ export interface bookingDataTypes {
   address: string;
   ghanaCard: string;
   driverLicense: string;
+  fleetId: string;
   extras: {
     gps: boolean;
     childSeat: boolean;
@@ -95,10 +96,13 @@ export interface bookingDataTypesStageTwo {
   address: string;
   ghanaCard: string;
   driverLicense: string;
-  // extras?: {
-  //   gps?: boolean;
-  //   childSeat?: boolean;
-  //   additionalDriver?: boolean;
-  //   fullInsurance?: boolean;
-  // };
+}
+
+export interface bookingDataTypesStageThree {
+  extras?: {
+    gps?: boolean;
+    childSeat?: boolean;
+    additionalDriver?: boolean;
+    fullInsurance?: boolean;
+  };
 }

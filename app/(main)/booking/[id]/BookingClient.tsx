@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { computeTotalPrice } from "@/components/computeTotalPrice";
 
 import { ArrowRight, ArrowLeft, Car, Check } from "lucide-react";
 
@@ -32,14 +33,13 @@ export default function BookingClient({ car }: { car: Car }) {
     returnTime: "",
     pickupLocation: "",
     returnLocation: "",
-
     fullName: "",
     email: "",
     phoneNumber: "",
     address: "",
     ghanaCard: "",
     driverLicense: "",
-
+    fleetId: car?._id,
     extras: {
       gps: false,
       childSeat: false,
@@ -60,6 +60,25 @@ export default function BookingClient({ car }: { car: Car }) {
     if (index > 0) {
       setStep(steps[index - 1]);
     }
+  };
+
+  const extrasConfig = {
+    gps: { label: "GPS Navigation", price: 10 },
+    childSeat: { label: "Child Seat", price: 15 },
+    additionalDriver: { label: "Additional Driver", price: 20 },
+    fullInsurance: { label: "Full Insurance", price: 35 },
+  };
+
+  const { days, totalPrice } = computeTotalPrice({
+    bookingData,
+    carPrice: car.price,
+  });
+
+  const formatPrice = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
   };
 
   return (
@@ -133,7 +152,7 @@ export default function BookingClient({ car }: { car: Car }) {
             <p className="text-gray-500 text-sm">{car.category}</p>
           </div>
 
-          <div className="text-base text-gray-500 flex flex-col gap-2">
+          <div className="text-base text-gray-500 flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h1 className="text-sm">Daily Rate</h1>
               <h1 className="text-primary text-sm font-bold">${car.price}</h1>
@@ -141,13 +160,28 @@ export default function BookingClient({ car }: { car: Car }) {
 
             <div className="flex justify-between items-center">
               <h1 className="text-sm">Duration</h1>
-              <h1 className="text-black text-sm">1 day(s)</h1>
+              <h1 className="text-black text-sm">{days} day(s)</h1>
             </div>
+
+            {Object.entries(bookingData.extras).map(([key, value]) => {
+              if (!value) return null;
+
+              const extra = extrasConfig[key as keyof typeof extrasConfig];
+
+              return (
+                <div key={key} className="flex justify-between items-center">
+                  <h1 className="text-sm">{extra.label}</h1>
+                  <h1 className="text-black text-sm">+${extra.price}</h1>
+                </div>
+              );
+            })}
           </div>
 
           <div className="border-t border-gray-200 py-2 flex justify-between items-center">
             <h1 className=" font-bold">Total</h1>
-            <p className="text-primary text-lg md:text-2xl font-bold">$599</p>
+            <p className="text-primary text-lg md:text-2xl font-bold">
+              ${formatPrice(totalPrice)}
+            </p>
           </div>
         </div>
       </section>

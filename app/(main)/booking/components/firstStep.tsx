@@ -2,6 +2,7 @@ import Input from "@/components/input";
 import { useRef, useState } from "react";
 import Button from "@/components/button";
 import FormError from "@/components/formError";
+import DatePicker from "@/components/datePicker";
 
 import { Calendar, Clock3, ArrowRight } from "lucide-react";
 import { bookingDataTypes } from "@/@types/auth";

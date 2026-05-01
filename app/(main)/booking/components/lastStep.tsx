@@ -1,8 +1,9 @@
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Button from "@/components/button";
 import { Check } from "lucide-react";
-import { ArrowRight, ArrowLeft, Car } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
+import { formatDate } from "@/components/formatDate";
 
 type ExtraKey = "gps" | "childSeat" | "additionalDriver" | "fullInsurance";
 
@@ -11,16 +12,18 @@ type Props = {
 };
 
 export default function LastStep({
-  nextStep,
+  prevStep,
   bookingData,
   setBookingData,
 }: any) {
+  const router = useRouter();
   const [checked, setChecked] = useState<Record<ExtraKey, boolean>>({
     gps: false,
     childSeat: false,
     additionalDriver: false,
     fullInsurance: false,
   });
+
   const extras: {
     key: ExtraKey;
     label: string;
@@ -47,6 +50,11 @@ export default function LastStep({
       desc: "Complete peace of mind",
     },
   ];
+
+  const handleSubmit = () => {
+    router.push(`/payment/${bookingData.fleetId}`);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-lg md:text-2xl font-bold">Extras & Review</h1>
@@ -63,12 +71,19 @@ export default function LastStep({
                 ? "border-primary bg-primary/20"
                 : "border-gray-200 hover:border-primary"
             }`}
-            onClick={() =>
-              setChecked({
+            onClick={() => {
+              const updatedChecked = {
                 ...checked,
                 [extra.key]: !checked[extra.key],
-              })
-            }
+              };
+
+              setChecked(updatedChecked);
+
+              setBookingData({
+                ...bookingData,
+                extras: updatedChecked,
+              });
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
@@ -108,30 +123,48 @@ export default function LastStep({
       <div className="border-t border-gray-200 p-4 flex flex-col gap-4">
         <h1 className="text-base font-bold">Booking Summary</h1>
 
-        <ul className="text-gray-500 flex flex-col gap-2">
-          <li>Pickup</li>
-          <li>Return</li>
-          <li>Pickup Location</li>
-          <li>Return Location</li>
-          <li>Driver</li>
+        <ul className="flex flex-col gap-2">
+          <div className="flex justify-between items-center">
+            <h1 className="text-gray-500">Pickup</h1>
+            <p className="font-medium">
+              {formatDate(bookingData?.pickupDate)} at {bookingData?.pickupTime}
+            </p>
+          </div>
+          <div className="flex justify-between items-center">
+            <h1 className="text-gray-500">Return</h1>
+            <p className="font-medium">
+              {formatDate(bookingData?.returnDate)} at {bookingData?.returnTime}
+            </p>
+          </div>
+          <div className="flex justify-between items-center">
+            <h1 className="text-gray-500">Pickup Location</h1>
+            <p className="font-medium">{bookingData?.pickupLocation}</p>
+          </div>
+          <div className="flex justify-between items-center">
+            <h1 className="text-gray-500">Return Location</h1>
+            <p className="font-medium">{bookingData?.returnLocation}</p>
+          </div>
+          <div className="flex justify-between items-center">
+            <h1 className="text-gray-500">Driver</h1>
+            <p className="font-medium">{bookingData?.fullName}</p>
+          </div>
         </ul>
       </div>
 
       <div className="flex justify-between items-center">
         <Button
-          // onClick={prevStep}
+          onClick={prevStep}
           className="flex items-center gap-4 border border-gray-200 py-2 px-4 rounded-md font-bold"
         >
           <ArrowLeft size={15} /> Back
         </Button>
 
-        <Link
-          // href={`/payment/${car._id}`}
-          href={`/payment/`}
+        <Button
+          onClick={handleSubmit}
           className="flex items-center gap-2 px-4 py-2 rounded-md text-base text-center font-bold transition-transform duration-200 ease-in-out lg:hover:cursor-pointer bg-primary text-black hover:bg-yellow-500 hover:scale-105"
         >
           Proceed to payment <ArrowRight size={15} />
-        </Link>
+        </Button>
       </div>
     </div>
   );

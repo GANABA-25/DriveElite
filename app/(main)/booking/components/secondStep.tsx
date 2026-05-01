@@ -106,6 +106,7 @@ export default function SecondStep({
             type="email"
             placeholder="john@example.com"
             icon={<Mail size={15} />}
+            value={bookingData.email}
             onChange={handleChange}
             hasError={
               (touched.email ? errors?.email : undefined) || errors?.email
@@ -120,6 +121,7 @@ export default function SecondStep({
             type="tel"
             placeholder="+233 xx xxx xxxx"
             icon={<Phone size={15} />}
+            value={bookingData.phoneNumber}
             onChange={handleChange}
             hasError={
               (touched.phoneNumber ? errors?.phoneNumber : undefined) ||
@@ -138,6 +140,7 @@ export default function SecondStep({
             type="text"
             placeholder="eg Ak-320-8463"
             icon={<MapPinHouse size={15} />}
+            value={bookingData.address}
             onChange={handleChange}
             hasError={
               (touched.address ? errors?.address : undefined) || errors?.address
@@ -154,6 +157,7 @@ export default function SecondStep({
             type="text"
             placeholder="eg GHA-739023159-5"
             icon={<IdCard size={15} />}
+            value={bookingData.ghanaCard}
             onChange={handleChange}
             hasError={
               (touched.ghanaCard ? errors?.ghanaCard : undefined) ||
@@ -172,6 +176,7 @@ export default function SecondStep({
             label="Driver's License Number"
             placeholder="License Number"
             icon={<IdCard size={15} />}
+            value={bookingData.driverLicense}
             onChange={handleChange}
             hasError={
               (touched.driverLicense ? errors?.driverLicense : undefined) ||
