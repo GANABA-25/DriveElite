@@ -1,17 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { computeTotalPrice } from "@/components/computeTotalPrice";
 
-import { ArrowRight, ArrowLeft, Car, Check } from "lucide-react";
+import { Car, Check } from "lucide-react";
 
-import { bookingDataTypes } from "@/@types/auth";
-import Button from "@/components/button";
 import FirstStep from "../components/firstStep";
 import SecondStep from "../components/secondStep";
 import LastStep from "../components/lastStep";
+import { useBooking } from "@/store/bookingContext";
 
 type Car = {
   _id: string;
@@ -23,30 +20,21 @@ type Car = {
 
 type Step = "firstStep" | "secondStep" | "lastStep";
 
+const formatPrice = (amount: number) => {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+};
+
 export default function BookingClient({ car }: { car: Car }) {
   const [step, setStep] = useState<Step>("firstStep");
   const steps: Step[] = ["firstStep", "secondStep", "lastStep"];
-  const [bookingData, setBookingData] = useState<bookingDataTypes>({
-    pickupDate: "",
-    returnDate: "",
-    pickupTime: "",
-    returnTime: "",
-    pickupLocation: "",
-    returnLocation: "",
-    fullName: "",
-    email: "",
-    phoneNumber: "",
-    address: "",
-    ghanaCard: "",
-    driverLicense: "",
-    fleetId: car?._id,
-    extras: {
-      gps: false,
-      childSeat: false,
-      additionalDriver: false,
-      fullInsurance: false,
-    },
-  });
+  const { bookingData, days, formattedPrice, setCarPrice } = useBooking();
+
+  useEffect(() => {
+    setCarPrice(car.price);
+  }, [car]);
 
   const nextStep = () => {
     const index = steps.indexOf(step);
@@ -67,18 +55,6 @@ export default function BookingClient({ car }: { car: Car }) {
     childSeat: { label: "Child Seat", price: 15 },
     additionalDriver: { label: "Additional Driver", price: 20 },
     fullInsurance: { label: "Full Insurance", price: 35 },
-  };
-
-  const { days, totalPrice } = computeTotalPrice({
-    bookingData,
-    carPrice: car.price,
-  });
-
-  const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
   };
 
   return (
@@ -109,29 +85,14 @@ export default function BookingClient({ car }: { car: Car }) {
 
       <section className="max-w-360 mx-auto flex flex-col lg:flex-row gap-8">
         <div className="flex-1 flex flex-col gap-4 border border-gray-200 p-4 md:p-8 rounded-md">
-          {step === "firstStep" && (
-            <FirstStep
-              nextStep={nextStep}
-              bookingData={bookingData}
-              setBookingData={setBookingData}
-            />
-          )}
+          {step === "firstStep" && <FirstStep nextStep={nextStep} />}
 
           {step === "secondStep" && (
-            <SecondStep
-              nextStep={nextStep}
-              prevStep={prevStep}
-              bookingData={bookingData}
-              setBookingData={setBookingData}
-            />
+            <SecondStep nextStep={nextStep} prevStep={prevStep} />
           )}
 
           {step === "lastStep" && (
-            <LastStep
-              prevStep={prevStep}
-              bookingData={bookingData}
-              setBookingData={setBookingData}
-            />
+            <LastStep prevStep={prevStep} fleetId={car._id} />
           )}
         </div>
 
@@ -180,7 +141,7 @@ export default function BookingClient({ car }: { car: Car }) {
           <div className="border-t border-gray-200 py-2 flex justify-between items-center">
             <h1 className=" font-bold">Total</h1>
             <p className="text-primary text-lg md:text-2xl font-bold">
-              ${formatPrice(totalPrice)}
+              ${days > 0 ? formattedPrice : formatPrice(car.price)}
             </p>
           </div>
         </div>

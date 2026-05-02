@@ -1,30 +1,24 @@
 import Input from "@/components/input";
 import Button from "@/components/button";
-import { bookingDataTypes } from "@/@types/auth";
 import { bookingDataTypesStageTwo } from "@/@types/auth";
 import FormError from "@/components/formError";
 import { validateBookingDataStageTwo } from "@/util/validation";
 import { useState } from "react";
+import { useBooking } from "@/store/bookingContext";
 
 import { Mail, Phone, MapPinHouse, IdCard, User } from "lucide-react";
-import { ArrowRight, ArrowLeft, Car, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 
 type Props = {
   nextStep: () => void;
   prevStep: () => void;
-  bookingData: bookingDataTypesStageTwo;
-  setBookingData: any;
 };
 
 type ErrorType = Partial<Record<keyof bookingDataTypesStageTwo, string>>;
 type TouchedType = Partial<Record<keyof bookingDataTypesStageTwo, boolean>>;
 
-export default function SecondStep({
-  nextStep,
-  prevStep,
-  bookingData,
-  setBookingData,
-}: Props) {
+export default function SecondStep({ nextStep, prevStep }: Props) {
+  const { bookingData, updateBookingData } = useBooking();
   const [errors, setErrors] = useState<ErrorType>({});
   const [touched, setTouched] = useState<TouchedType>({});
 
@@ -38,7 +32,7 @@ export default function SecondStep({
       [name]: value,
     };
 
-    setBookingData(updatedValues);
+    updateBookingData(updatedValues);
 
     setTouched((prev) => ({
       ...prev,

@@ -15,12 +15,19 @@ import {
   Calendar,
 } from "lucide-react";
 import Link from "next/link";
+import { processPayment } from "@/lib/payments/processPayment";
+import { useActionState } from "react";
 
 import CompletedPayment from "../completedPayment";
 import Input from "@/components/input";
-import Button from "@/components/button";
+import Lottie from "lottie-react";
+import { formatDate } from "@/components/formatDate";
+import { useBooking } from "@/store/bookingContext";
+
+import loadingAnimation from "../../../../lottie/formLoadingAnimation.json";
 
 import { fleetFiltersDataTypes } from "@/@types/fleet.types";
+import { FormState } from "@/@types/auth";
 
 type Props = {
   fleet: fleetFiltersDataTypes;
@@ -36,12 +43,45 @@ type paymentProviderTypes = (typeof providers)[number]["key"];
 
 const paymentIsCompleted = false;
 
+interface paymentDataTypes {
+  provider: string;
+  accountName: string;
+  accountNumber: string;
+}
+
 export default function PaymentDetails({ fleet }: Props) {
+  const { bookingData, updateBookingData, days, formattedPrice } = useBooking();
   const [paymentMethod, setPaymentMethod] = useState("mobileMoney");
   const [selectedProvider, setSelectedProvider] =
     useState<paymentProviderTypes | null>(null);
+  const [formState, formAction, isPending] = useActionState<
+    FormState,
+    FormData
+  >(processPayment, {
+    status: undefined,
+    message: "",
+    errors: {},
+  });
 
   if (!fleet) return <p>Car not found</p>;
+
+  const handlePaymentChange = (
+    field: string,
+    value: string,
+    section: "mobileMoney" | "card",
+  ) => {
+    updateBookingData({
+      paymentDetails: {
+        ...bookingData.paymentDetails,
+        paymentOption: paymentMethod,
+        [section]: {
+          ...bookingData.paymentDetails[section],
+          [field]: value,
+        },
+      },
+    });
+  };
+
   return (
     <>
       <section className="flex flex-col lg:flex-row justify-center md:items-center items-start lg:items-start gap-8 px-4 lg:px-0">
@@ -91,64 +131,108 @@ export default function PaymentDetails({ fleet }: Props) {
             </div>
 
             {paymentMethod === "mobileMoney" && (
-              <div className="flex flex-col gap-4">
-                <h1>Select Provider</h1>
+              <div>
+                <form action={formAction} className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-4">
+                    <h1>Select Provider</h1>
 
-                {providers.map((provider) => (
-                  <div
-                    key={provider.key}
-                    role="radio"
-                    aria-checked={selectedProvider === provider.key}
-                    tabIndex={0}
-                    className={`flex justify-between items-center border p-4 rounded-md cursor-pointer transition-all ${
-                      selectedProvider === provider.key
-                        ? "border-primary bg-primary/20"
-                        : "border-gray-200 hover:border-primary"
-                    }`}
-                    onClick={() => setSelectedProvider(provider.key)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setSelectedProvider(provider.key);
-                      }
-                    }}
-                  >
-                    <div className="flex items-center gap-4">
+                    {providers.map((provider) => (
                       <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                        key={provider.key}
+                        role="radio"
+                        aria-checked={selectedProvider === provider.key}
+                        tabIndex={0}
+                        className={`flex justify-between items-center border p-4 rounded-md cursor-pointer transition-all ${
                           selectedProvider === provider.key
-                            ? "bg-yellow-400 border-yellow-400"
-                            : "border-gray-400"
+                            ? "border-primary bg-primary/20"
+                            : "border-gray-200 hover:border-primary"
                         }`}
+                        onClick={() => {
+                          setSelectedProvider(provider.key);
+
+                          updateBookingData({
+                            paymentDetails: {
+                              ...bookingData.paymentDetails,
+                              paymentOption: "mobileMoney",
+                              mobileMoney: {
+                                ...bookingData.paymentDetails.mobileMoney,
+                                provider: provider.key,
+                              },
+                            },
+                          });
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedProvider(provider.key);
+                          }
+                        }}
                       >
-                        {selectedProvider === provider.key && (
-                          <Check className="w-3 h-3 text-white" />
-                        )}
-                      </div>
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                              selectedProvider === provider.key
+                                ? "bg-yellow-400 border-yellow-400"
+                                : "border-gray-400"
+                            }`}
+                          >
+                            {selectedProvider === provider.key && (
+                              <Check className="w-3 h-3 text-white" />
+                            )}
+                          </div>
 
-                      <div>
-                        <h1 className="text-sm md:text-base">
-                          {provider.label}
-                        </h1>
-                        <p className="text-gray-500 text-xs">{provider.desc}</p>
+                          <div>
+                            <h1 className="text-sm md:text-base">
+                              {provider.label}
+                            </h1>
+                            <p className="text-gray-500 text-xs">
+                              {provider.desc}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-
-                <form className="flex flex-col gap-4">
+                  <input
+                    type="hidden"
+                    name="provider"
+                    value={selectedProvider || ""}
+                  />
+                  <input
+                    type="hidden"
+                    name="bookingData"
+                    value={JSON.stringify(bookingData)}
+                  />
                   <Input
+                    name="accountNumber"
                     label="Mobile Money Number"
                     type="tel"
                     placeholder="eg. 0xx xxx xxxx"
                     icon={<Phone size={15} />}
+                    value={bookingData.paymentDetails.mobileMoney.accountNumber}
+                    onChange={(e) =>
+                      handlePaymentChange(
+                        "accountNumber",
+                        e.target.value,
+                        "mobileMoney",
+                      )
+                    }
                   />
 
                   <Input
+                    name="accountName"
                     label="Account Name"
                     type="tel"
                     placeholder="Name on mobile money account"
                     icon={<Phone size={15} />}
+                    value={bookingData.paymentDetails.mobileMoney.accountName}
+                    onChange={(e) =>
+                      handlePaymentChange(
+                        "accountName",
+                        e.target.value,
+                        "mobileMoney",
+                      )
+                    }
                   />
 
                   <div className="bg-[#fef9e7] flex flex-col gap-1 p-4">
@@ -170,12 +254,25 @@ export default function PaymentDetails({ fleet }: Props) {
                     </p>
                   </div>
 
-                  <Button>
-                    <span className="flex justify-center items-center gap-2">
-                      <Shield size={15} />
-                      Pay $ 199 Now
-                    </span>
-                  </Button>
+                  <button
+                    type="submit"
+                    className={`p-2 bg-primary text-accent font-bold lg:hover:bg-primary/80 rounded-md shadow-xs cursor-pointer`}
+                  >
+                    {isPending ? (
+                      <div className="flex justify-center ">
+                        <Lottie
+                          className="w-18 lg:w-18"
+                          animationData={loadingAnimation}
+                          loop={true}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex justify-center items-center gap-2">
+                        <Shield size={15} />
+                        Pay $ 199 Now
+                      </div>
+                    )}
+                  </button>
                 </form>
               </div>
             )}
@@ -183,6 +280,7 @@ export default function PaymentDetails({ fleet }: Props) {
             {paymentMethod === "creditCard" && (
               <form className="flex flex-col gap-4">
                 <Input
+                  name="cardNumber"
                   type="tel"
                   icon={<CreditCard size={15} />}
                   label="Card Number"
@@ -190,6 +288,7 @@ export default function PaymentDetails({ fleet }: Props) {
                 />
 
                 <Input
+                  name="cardName"
                   type="tel"
                   icon={<Pen size={15} />}
                   label="Name on Card"
@@ -198,6 +297,7 @@ export default function PaymentDetails({ fleet }: Props) {
 
                 <div className="flex flex-col md:flex-row items-center gap-4">
                   <Input
+                    name="cardExpiryDate"
                     type="date"
                     icon={<Calendar size={15} />}
                     label="Expiry Date"
@@ -205,6 +305,7 @@ export default function PaymentDetails({ fleet }: Props) {
                   />
 
                   <Input
+                    name="cardCvv"
                     type="tel"
                     icon={<Pen size={15} />}
                     label="CVV"
@@ -219,18 +320,31 @@ export default function PaymentDetails({ fleet }: Props) {
                   </p>
                 </div>
 
-                <Button>
-                  <span className="flex justify-center items-center gap-2">
-                    <Shield size={15} />
-                    Pay $ 199 Now
-                  </span>
-                </Button>
+                <button
+                  type="submit"
+                  className={`p-2 bg-primary text-accent font-bold lg:hover:bg-primary/80 rounded-md shadow-xs cursor-pointer`}
+                >
+                  {isPending ? (
+                    <div className="flex justify-center ">
+                      <Lottie
+                        className="w-18 lg:w-18"
+                        animationData={loadingAnimation}
+                        loop={true}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex justify-center items-center gap-2">
+                      <Shield size={15} />
+                      Pay $ 199 Now
+                    </div>
+                  )}
+                </button>
               </form>
             )}
           </div>
         </div>
 
-        <div className="sticky lg:top-42 h-fit w-full lg:w-110 border border-gray-200 p-6 rounded-md flex flex-col gap-4">
+        <div className="sticky lg:top-45 h-fit w-full lg:w-110 border border-gray-200 p-6 rounded-md flex flex-col gap-4">
           <div className="relative h-40 md:h-85 lg:h-50 w-full rounded-md overflow-hidden">
             <Image
               src={fleet.imageUrl}
@@ -250,29 +364,41 @@ export default function PaymentDetails({ fleet }: Props) {
             <div className="text-sm flex flex-col gap-2">
               <div className="flex justify-between items-center">
                 <p>Pickup</p>
-                <h1 className="text-sm text-black font-medium">Feb 4, 2026</h1>
+                <h1 className="text-sm text-black font-medium">
+                  {formatDate(bookingData.pickupDate)} at{" "}
+                  {bookingData?.pickupTime}
+                </h1>
               </div>
 
               <div className="flex justify-between items-center">
                 <p>Return</p>
-                <h1 className="text-sm text-black font-medium">Feb 4, 2026</h1>
+                <h1 className="text-sm text-black font-medium">
+                  {formatDate(bookingData.returnDate)} at{" "}
+                  {bookingData?.returnTime}
+                </h1>
               </div>
 
               <div className="flex justify-between items-center">
                 <p>Duration</p>
-                <h1 className="text-sm text-black font-medium">1 day(s)</h1>
+                <h1 className="text-sm text-black font-medium">
+                  {days} day(s)
+                </h1>
               </div>
 
               <div className="flex justify-between items-center">
                 <p>Daily Rate</p>
-                <h1 className="text-sm text-black font-medium">$599</h1>
+                <h1 className="text-sm text-black font-medium">
+                  ${fleet.price}
+                </h1>
               </div>
             </div>
           </div>
 
           <div className="border-t border-gray-200 py-2 flex justify-between items-center">
             <h1 className=" font-bold">Total</h1>
-            <p className="text-primary text-lg md:text-2xl font-bold">$599</p>
+            <p className="text-primary text-lg md:text-2xl font-bold">
+              ${formattedPrice}
+            </p>
           </div>
         </div>
       </section>

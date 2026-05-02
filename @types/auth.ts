@@ -78,6 +78,20 @@ export interface bookingDataTypes {
     additionalDriver: boolean;
     fullInsurance: boolean;
   };
+  paymentDetails: {
+    paymentOption: string;
+    mobileMoney: {
+      provider: string;
+      accountNumber: string;
+      accountName: string;
+    };
+    card: {
+      cardNumber: string;
+      cardName: string;
+      cardExpiryDate: string;
+      cardCvv: string;
+    };
+  };
 }
 
 export interface bookingDataTypesStageOne {

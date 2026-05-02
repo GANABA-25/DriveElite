@@ -2,27 +2,21 @@ import Input from "@/components/input";
 import { useRef, useState } from "react";
 import Button from "@/components/button";
 import FormError from "@/components/formError";
-import DatePicker from "@/components/datePicker";
 
 import { Calendar, Clock3, ArrowRight } from "lucide-react";
-import { bookingDataTypes } from "@/@types/auth";
 import { bookingDataTypesStageOne } from "@/@types/auth";
 import { validateBookingDataStageOne } from "@/util/validation";
+import { useBooking } from "@/store/bookingContext";
 
 type Props = {
   nextStep: () => void;
-  bookingData: bookingDataTypesStageOne;
-  setBookingData: any;
 };
 
 type ErrorType = Partial<Record<keyof bookingDataTypesStageOne, string>>;
 type TouchedType = Partial<Record<keyof bookingDataTypesStageOne, boolean>>;
 
-export default function FirstStep({
-  nextStep,
-  bookingData,
-  setBookingData,
-}: Props) {
+export default function FirstStep({ nextStep }: Props) {
+  const { bookingData, updateBookingData } = useBooking();
   const [errors, setErrors] = useState<ErrorType>({});
   const [touched, setTouched] = useState<TouchedType>({});
 
@@ -36,7 +30,7 @@ export default function FirstStep({
       [name]: value,
     };
 
-    setBookingData(updatedValues);
+    updateBookingData(updatedValues);
 
     setTouched((prev) => ({
       ...prev,

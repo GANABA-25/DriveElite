@@ -4,18 +4,13 @@ import Button from "@/components/button";
 import { Check } from "lucide-react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { formatDate } from "@/components/formatDate";
+import { useBooking } from "@/store/bookingContext";
 
 type ExtraKey = "gps" | "childSeat" | "additionalDriver" | "fullInsurance";
 
-type Props = {
-  prevStep: () => void;
-};
+export default function LastStep({ prevStep, fleetId }: any) {
+  const { bookingData, updateBookingData } = useBooking();
 
-export default function LastStep({
-  prevStep,
-  bookingData,
-  setBookingData,
-}: any) {
   const router = useRouter();
   const [checked, setChecked] = useState<Record<ExtraKey, boolean>>({
     gps: false,
@@ -52,7 +47,7 @@ export default function LastStep({
   ];
 
   const handleSubmit = () => {
-    router.push(`/payment/${bookingData.fleetId}`);
+    router.push(`/payment/${fleetId}`);
   };
 
   return (
@@ -79,7 +74,7 @@ export default function LastStep({
 
               setChecked(updatedChecked);
 
-              setBookingData({
+              updateBookingData({
                 ...bookingData,
                 extras: updatedChecked,
               });
