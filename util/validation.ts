@@ -7,6 +7,23 @@ import {
   bookingDataTypesStageTwo,
 } from "@/@types/auth";
 
+export type PaymentDataTypes = {
+  paymentDetails: {
+    paymentOption: string;
+    mobileMoney: {
+      provider: string;
+      accountNumber: string;
+      accountName: string;
+    };
+    card: {
+      cardNumber: string;
+      cardName: string;
+      cardExpiryDate: string;
+      cardCvv: string;
+    };
+  };
+};
+
 export const validateSignUpData = (signUpData: FormDataTypes) => {
   const { firstName, lastName, email, phoneNumber, password, confirmPassword } =
     signUpData;
@@ -209,6 +226,54 @@ export const validateBookingDataStageTwo = (
 
     driverLicense: !driverLicense.trim() ? "Driver's license is required" : "",
   };
+
+  return errors;
+};
+
+export const validatePaymentData = (data: PaymentDataTypes) => {
+  const errors: Record<string, string> = {};
+
+  const { paymentDetails } = data;
+
+  if (paymentDetails.paymentOption === "mobileMoney") {
+    const { provider, accountNumber, accountName } = paymentDetails.mobileMoney;
+
+    if (!provider) {
+      errors.provider = "Provider is required";
+    }
+
+    if (!accountNumber) {
+      errors.accountNumber = "Account number is required";
+    } else if (!/^\d{10}$/.test(accountNumber)) {
+      errors.accountNumber =
+        "Account number must be exactly 10 digits (e.g. 0596498006)";
+    }
+
+    if (!accountName) {
+      errors.accountName = "Account name is required";
+    }
+  }
+
+  if (paymentDetails.paymentOption === "creditCard") {
+    const { cardNumber, cardName, cardExpiryDate, cardCvv } =
+      paymentDetails.card;
+
+    if (!cardNumber) {
+      errors.cardNumber = "Card number is required";
+    }
+
+    if (!cardName) {
+      errors.cardName = "Card name is required";
+    }
+
+    if (!cardExpiryDate) {
+      errors.cardExpiryDate = "Expiry date is required";
+    }
+
+    if (!cardCvv) {
+      errors.cardCvv = "CVV is required";
+    }
+  }
 
   return errors;
 };

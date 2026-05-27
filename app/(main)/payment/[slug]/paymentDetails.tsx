@@ -17,9 +17,11 @@ import {
 import Link from "next/link";
 import { processPayment } from "@/lib/payments/processPayment";
 import { useActionState } from "react";
+import { validatePaymentData } from "@/util/validation";
 
 import CompletedPayment from "../completedPayment";
 import Input from "@/components/input";
+import FormError from "@/components/formError";
 import Lottie from "lottie-react";
 import { formatDate } from "@/components/formatDate";
 import { useBooking } from "@/store/bookingContext";
@@ -33,6 +35,9 @@ type Props = {
   fleet: fleetFiltersDataTypes;
 };
 
+type ErrorType = Record<string, string>;
+type TouchedType = Partial<Record<keyof FormDataTypes, boolean>>;
+
 const providers = [
   { key: "MTN", label: "MTN Mobile Money", desc: "024, 054, 055, 059" },
   { key: "Telecel", label: "Telecel Cash", desc: "020, 050" },
@@ -44,13 +49,26 @@ type paymentProviderTypes = (typeof providers)[number]["key"];
 const paymentIsCompleted = false;
 
 interface paymentDataTypes {
-  provider: string;
-  accountName: string;
-  accountNumber: string;
+  paymentDetails: {
+    paymentOption: string;
+    mobileMoney: {
+      provider: string;
+      accountNumber: string;
+      accountName: string;
+    };
+    card: {
+      cardNumber: string;
+      cardName: string;
+      cardExpiryDate: string;
+      cardCvv: string;
+    };
+  };
 }
 
 export default function PaymentDetails({ fleet }: Props) {
   const { bookingData, updateBookingData, days, formattedPrice } = useBooking();
+  const [errors, setErrors] = useState<ErrorType>({});
+  const [touched, setTouched] = useState<TouchedType>({});
   const [paymentMethod, setPaymentMethod] = useState("mobileMoney");
   const [selectedProvider, setSelectedProvider] =
     useState<paymentProviderTypes | null>(null);
@@ -63,7 +81,49 @@ export default function PaymentDetails({ fleet }: Props) {
     errors: {},
   });
 
+  const [paymentData, setPaymentData] = useState<paymentDataTypes>({
+    paymentDetails: {
+      paymentOption: "",
+      mobileMoney: {
+        provider: "",
+        accountNumber: "",
+        accountName: "",
+      },
+      card: {
+        cardNumber: "",
+        cardName: "",
+        cardExpiryDate: "",
+        cardCvv: "",
+      },
+    },
+  });
+
   if (!fleet) return <p>Car not found</p>;
+
+  const handleChange = (
+    section: "mobileMoney" | "card",
+    field: string,
+    value: string,
+  ) => {
+    const updated = {
+      ...paymentData,
+      paymentDetails: {
+        ...paymentData.paymentDetails,
+        [section]: {
+          ...paymentData.paymentDetails[section],
+          [field]: value,
+        },
+      },
+    };
+
+    setPaymentData(updated);
+
+    const validationErrors = validatePaymentData(updated);
+
+    console.log("checking errors", validationErrors);
+
+    setErrors(validationErrors);
+  };
 
   const handlePaymentChange = (
     field: string,
@@ -203,37 +263,47 @@ export default function PaymentDetails({ fleet }: Props) {
                     name="bookingData"
                     value={JSON.stringify(bookingData)}
                   />
-                  <Input
-                    name="accountNumber"
-                    label="Mobile Money Number"
-                    type="tel"
-                    placeholder="eg. 0xx xxx xxxx"
-                    icon={<Phone size={15} />}
-                    value={bookingData.paymentDetails.mobileMoney.accountNumber}
-                    onChange={(e) =>
-                      handlePaymentChange(
-                        "accountNumber",
-                        e.target.value,
-                        "mobileMoney",
-                      )
-                    }
-                  />
+                  <div className="flex flex-col gap-2">
+                    <Input
+                      name="accountNumber"
+                      label="Mobile Money Number"
+                      type="tel"
+                      placeholder="eg. 0xx xxx xxxx"
+                      icon={<Phone size={15} />}
+                      value={
+                        paymentData.paymentDetails.mobileMoney.accountNumber
+                      }
+                      onChange={(e) =>
+                        handleChange(
+                          "mobileMoney",
+                          "accountNumber",
+                          e.target.value,
+                        )
+                      }
+                      hasError={errors.accountNumber}
+                    />
+                    <FormError message={errors.accountNumber} />
+                  </div>
 
-                  <Input
-                    name="accountName"
-                    label="Account Name"
-                    type="tel"
-                    placeholder="Name on mobile money account"
-                    icon={<Phone size={15} />}
-                    value={bookingData.paymentDetails.mobileMoney.accountName}
-                    onChange={(e) =>
-                      handlePaymentChange(
-                        "accountName",
-                        e.target.value,
-                        "mobileMoney",
-                      )
-                    }
-                  />
+                  <div className="flex flex-col gap-2">
+                    <Input
+                      name="accountName"
+                      label="Account Name"
+                      type="tel"
+                      placeholder="Name on mobile money account"
+                      icon={<Phone size={15} />}
+                      value={paymentData.paymentDetails.mobileMoney.accountName}
+                      onChange={(e) =>
+                        handleChange(
+                          "mobileMoney",
+                          "accountName",
+                          e.target.value,
+                        )
+                      }
+                      hasError={errors.accountName}
+                    />
+                    <FormError message={errors.accountName} />
+                  </div>
 
                   <div className="bg-[#fef9e7] flex flex-col gap-1 p-4">
                     <div className="flex items-center gap-2">
@@ -269,7 +339,7 @@ export default function PaymentDetails({ fleet }: Props) {
                     ) : (
                       <div className="flex justify-center items-center gap-2">
                         <Shield size={15} />
-                        Pay $ 199 Now
+                        Pay ${formattedPrice}
                       </div>
                     )}
                   </button>

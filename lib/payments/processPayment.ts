@@ -18,8 +18,6 @@ export async function processPayment(
       bookingData: formData.get("bookingData"),
     };
 
-    console.log("checking full data: v2 ", bookingData);
-
     return {
       status: "success",
       message: "Payment completed successfully",

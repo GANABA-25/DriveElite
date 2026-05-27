@@ -52,7 +52,7 @@ export default function AboutPage() {
   return (
     <div>
       <header className="text-center flex flex-col gap-4 bg-[#eceef1] py-8 px-4">
-        <p className="text-base uppercase">About DriveElite</p>
+        <p className="text-base uppercase">About Drive Elite</p>
         <h1 className="text-4xl md:text-5xl font-black">
           Redefining <span className="text-primary">Premium</span> Car <br />
           Rentals
