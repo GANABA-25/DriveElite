@@ -26,7 +26,8 @@ export type bookingFormState = {
   message?: string;
   errors?: Partial<Record<keyof bookingDataTypes, string>>;
   booking?: {
-    fleetId: string;
+    bookingId: string;
+    bookingReference: string;
   };
 };
 

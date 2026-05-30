@@ -7,6 +7,7 @@ import {
   useActionState,
   useTransition,
 } from "react";
+import { useRouter } from "next/navigation";
 import Lottie from "lottie-react";
 import { toast } from "react-toastify";
 import Image from "next/image";
@@ -14,7 +15,7 @@ import Input from "@/components/input";
 import Button from "@/components/button";
 import FormError from "@/components/formError";
 
-import { carBookings } from "@/lib/bookings/carBooking";
+import { createBooking } from "@/lib/bookings/createBooking";
 import { bookingFormState } from "@/@types/bookingTypes";
 import { bookingDataTypes } from "@/@types/bookingTypes";
 import { validateBookingData } from "@/util/validation";
@@ -119,6 +120,7 @@ type ErrorType = Partial<Record<keyof bookingDataTypes, string>>;
 type TouchedType = Partial<Record<keyof bookingDataTypes, boolean>>;
 
 export default function BookingClient({ car }: { car: Car }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState<Step>("TripDetails");
   const steps: Step[] = ["TripDetails", "CustomerDetails", "ExtraDetails"];
@@ -127,7 +129,7 @@ export default function BookingClient({ car }: { car: Car }) {
   const [bookingData, setBookingData] =
     useState<bookingDataTypes>(initialBookingData);
   const [formState, formAction] = useActionState<bookingFormState, FormData>(
-    carBookings,
+    createBooking,
     {
       status: undefined,
       message: "",
@@ -137,7 +139,6 @@ export default function BookingClient({ car }: { car: Car }) {
 
   const nextStep = () => {
     const validationErrors = validateBookingData(bookingData);
-
     setErrors(validationErrors);
     setTouched((prev) => ({
       ...prev,
@@ -242,6 +243,9 @@ export default function BookingClient({ car }: { car: Car }) {
     e.preventDefault();
 
     const formData = new FormData();
+    const fleetId = car._id;
+
+    formData.append("fleetId", fleetId);
 
     Object.entries(bookingData).forEach(([key, value]) => {
       if (typeof value === "object") {
@@ -255,6 +259,20 @@ export default function BookingClient({ car }: { car: Car }) {
       formAction(formData);
     });
   };
+
+  useEffect(() => {
+    if (!formState?.message) return;
+
+    if (formState.status === "success") {
+      toast.success(formState.message);
+      router.push(`/payment/${formState.booking?.bookingId}`);
+    }
+
+    if (formState.status === "error") {
+      setErrors(formState.errors || {});
+      toast.error(formState.message);
+    }
+  }, [formState]);
 
   return (
     <div className="py-8 md:py-12 px-4">
@@ -690,6 +708,7 @@ export default function BookingClient({ car }: { car: Car }) {
 
           <div className="flex justify-between items-center">
             <Button
+              type="button"
               onClick={prevStep}
               className="flex items-center gap-4 border border-gray-200 py-2 px-4 rounded-md font-bold cursor-pointer lg:hover:border-primary"
             >
@@ -710,12 +729,14 @@ export default function BookingClient({ car }: { car: Car }) {
                   </div>
                 ) : (
                   <div className="flex justify-center items-center gap-2">
-                    Proceed to payment <ArrowRight size={15} />
+                    Complete Booking
+                    <ArrowRight size={15} />
                   </div>
                 )}
               </button>
             ) : (
               <Button
+                type="button"
                 onClick={nextStep}
                 className="flex items-center gap-4 border border-gray-200 transition-transform duration-200 ease-in-out lg:hover:cursor-pointer bg-primary py-2 px-4 rounded-md font-bold hover:bg-yellow-500 hover:scale-105"
               >
