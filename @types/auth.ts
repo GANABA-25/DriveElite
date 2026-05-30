@@ -58,65 +58,65 @@ export interface contactUsDataTypes {
   message: string;
 }
 
-export interface bookingDataTypes {
-  pickupDate: string;
-  returnDate: string;
-  pickupTime: string;
-  returnTime: string;
-  pickupLocation: string;
-  returnLocation: string;
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  address: string;
-  ghanaCard: string;
-  driverLicense: string;
-  fleetId: string;
-  extras: {
-    gps: boolean;
-    childSeat: boolean;
-    additionalDriver: boolean;
-    fullInsurance: boolean;
-  };
-  paymentDetails: {
-    paymentOption: string;
-    mobileMoney: {
-      provider: string;
-      accountNumber: string;
-      accountName: string;
-    };
-    card: {
-      cardNumber: string;
-      cardName: string;
-      cardExpiryDate: string;
-      cardCvv: string;
-    };
-  };
-}
+// export interface bookingDataTypes {
+//   pickupDate: string;
+//   returnDate: string;
+//   pickupTime: string;
+//   returnTime: string;
+//   pickupLocation: string;
+//   returnLocation: string;
+//   fullName: string;
+//   email: string;
+//   phoneNumber: string;
+//   address: string;
+//   ghanaCard: string;
+//   driverLicense: string;
+//   fleetId: string;
+//   extras: {
+//     gps: boolean;
+//     childSeat: boolean;
+//     additionalDriver: boolean;
+//     fullInsurance: boolean;
+//   };
+//   // paymentDetails: {
+//   //   paymentOption: string;
+//   //   mobileMoney: {
+//   //     provider: string;
+//   //     accountNumber: string;
+//   //     accountName: string;
+//   //   };
+//   //   card: {
+//   //     cardNumber: string;
+//   //     cardName: string;
+//   //     cardExpiryDate: string;
+//   //     cardCvv: string;
+//   //   };
+//   // };
+// }
 
-export interface bookingDataTypesStageOne {
-  pickupDate: string;
-  returnDate: string;
-  pickupTime: string;
-  returnTime: string;
-  pickupLocation: string;
-  returnLocation: string;
-}
+// export interface bookingDataTypesStageOne {
+//   pickupDate: string;
+//   returnDate: string;
+//   pickupTime: string;
+//   returnTime: string;
+//   pickupLocation: string;
+//   returnLocation: string;
+// }
 
-export interface bookingDataTypesStageTwo {
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  address: string;
-  ghanaCard: string;
-  driverLicense: string;
-}
+// export interface bookingDataTypesStageTwo {
+//   fullName: string;
+//   email: string;
+//   phoneNumber: string;
+//   address: string;
+//   ghanaCard: string;
+//   driverLicense: string;
+// }
 
-export interface bookingDataTypesStageThree {
-  extras?: {
-    gps?: boolean;
-    childSeat?: boolean;
-    additionalDriver?: boolean;
-    fullInsurance?: boolean;
-  };
-}
+// export interface bookingDataTypesStageThree {
+//   extras?: {
+//     gps?: boolean;
+//     childSeat?: boolean;
+//     additionalDriver?: boolean;
+//     fullInsurance?: boolean;
+//   };
+// }

@@ -1,24 +1,47 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import { bookingDataTypes } from "@/@types/auth";
+import { createContext, useContext, useMemo, useState, ReactNode } from "react";
 import { computeTotalPrice } from "@/components/computeTotalPrice";
+import { bookingDataTypes } from "@/@types/bookingTypes";
 
 interface BookingContextType {
   bookingData: bookingDataTypes;
   days: number;
   totalPrice: number;
   formattedPrice: string;
-  updateBookingData: (data: Partial<bookingDataTypes>) => void;
   setCarPrice: (price: number) => void;
-  clearBookingData: () => void;
+  updateField: <K extends keyof bookingDataTypes>(
+    field: K,
+    value: bookingDataTypes[K],
+  ) => void;
+  updateExtras: (
+    extra: keyof bookingDataTypes["extras"],
+    value: boolean,
+  ) => void;
+  resetBooking: () => void;
 }
+
+const initialBookingData: bookingDataTypes = {
+  pickupDate: "",
+  returnDate: "",
+  pickupTime: "",
+  returnTime: "",
+  pickupLocation: "",
+  returnLocation: "",
+  fullName: "",
+  email: "",
+  phoneNumber: "",
+  address: "",
+  ghanaCard: "",
+  driverLicense: "",
+  fleetId: "",
+  extras: {
+    gps: false,
+    childSeat: false,
+    additionalDriver: false,
+    fullInsurance: false,
+  },
+};
 
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
 
@@ -27,45 +50,44 @@ export const BookingContextProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [carPrice, setCarPriceState] = useState<number>(0);
-  const [days, setDays] = useState<number>(0);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [bookingData, setBookingData] =
+    useState<bookingDataTypes>(initialBookingData);
 
-  const [bookingData, setBookingData] = useState<bookingDataTypes>({
-    pickupDate: "",
-    returnDate: "",
-    pickupTime: "",
-    returnTime: "",
-    pickupLocation: "",
-    returnLocation: "",
-    fullName: "",
-    email: "",
-    phoneNumber: "",
-    address: "",
-    ghanaCard: "",
-    driverLicense: "",
-    fleetId: "",
-    extras: {
-      gps: false,
-      childSeat: false,
-      additionalDriver: false,
-      fullInsurance: false,
-    },
-    paymentDetails: {
-      paymentOption: "",
-      mobileMoney: {
-        provider: "",
-        accountNumber: "",
-        accountName: "",
+  const [carPrice, setCarPrice] = useState<number>(0);
+
+  const pricing = useMemo(() => {
+    return computeTotalPrice({
+      bookingData,
+      carPrice,
+    });
+  }, [bookingData, carPrice]);
+
+  const updateField = <K extends keyof bookingDataTypes>(
+    field: K,
+    value: bookingDataTypes[K],
+  ) => {
+    setBookingData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const updateExtras = (
+    extra: keyof bookingDataTypes["extras"],
+    value: boolean,
+  ) => {
+    setBookingData((prev) => ({
+      ...prev,
+      extras: {
+        ...prev.extras,
+        [extra]: value,
       },
-      card: {
-        cardNumber: "",
-        cardName: "",
-        cardExpiryDate: "",
-        cardCvv: "",
-      },
-    },
-  });
+    }));
+  };
+
+  const resetBooking = () => {
+    setBookingData(initialBookingData);
+  };
 
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -74,51 +96,23 @@ export const BookingContextProvider = ({
     }).format(amount);
   };
 
-  useEffect(() => {
-    if (!carPrice) return;
-
-    const result = computeTotalPrice({
-      bookingData,
-      carPrice,
-    });
-
-    setDays(result.days);
-    setTotalPrice(result.totalPrice);
-  }, [bookingData, carPrice]);
-
-  const updateBookingData = (data: Partial<bookingDataTypes>) => {
-    setBookingData((prev) => ({
-      ...prev,
-      ...data,
-    }));
-  };
-
-  const setCarPrice = (price: number) => {
-    setCarPriceState(price);
-  };
-
-  const clearBookingData = () => {
-    // setBookingData(null);
-  };
-
   return (
     <BookingContext.Provider
       value={{
         bookingData,
-        days,
-        totalPrice,
-        formattedPrice: formatPrice(totalPrice),
-        updateBookingData,
+        days: pricing.days,
+        totalPrice: pricing.totalPrice,
+        formattedPrice: formatPrice(pricing.totalPrice),
         setCarPrice,
-        clearBookingData,
+        updateField,
+        updateExtras,
+        resetBooking,
       }}
     >
       {children}
     </BookingContext.Provider>
   );
 };
-
-export default BookingContextProvider;
 
 export const useBooking = () => {
   const context = useContext(BookingContext);
@@ -129,3 +123,5 @@ export const useBooking = () => {
 
   return context;
 };
+
+export default BookingContextProvider;

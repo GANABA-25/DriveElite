@@ -1,4 +1,4 @@
-import { bookingDataTypes } from "@/@types/auth";
+import { bookingDataTypes } from "@/@types/bookingTypes";
 
 type ComputeTotalPriceProps = {
   bookingData: bookingDataTypes;

@@ -17,7 +17,6 @@ import {
 import Link from "next/link";
 import { processPayment } from "@/lib/payments/processPayment";
 import { useActionState } from "react";
-import { validatePaymentData } from "@/util/validation";
 
 import CompletedPayment from "../completedPayment";
 import Input from "@/components/input";
@@ -66,7 +65,7 @@ interface paymentDataTypes {
 }
 
 export default function PaymentDetails({ fleet }: Props) {
-  const { bookingData, updateBookingData, days, formattedPrice } = useBooking();
+  const { bookingData, days, formattedPrice } = useBooking();
   const [errors, setErrors] = useState<ErrorType>({});
   const [touched, setTouched] = useState<TouchedType>({});
   const [paymentMethod, setPaymentMethod] = useState("mobileMoney");
@@ -118,28 +117,9 @@ export default function PaymentDetails({ fleet }: Props) {
 
     setPaymentData(updated);
 
-    const validationErrors = validatePaymentData(updated);
+    // const validationErrors = validatePaymentData(updated);
 
-    console.log("checking errors", validationErrors);
-
-    setErrors(validationErrors);
-  };
-
-  const handlePaymentChange = (
-    field: string,
-    value: string,
-    section: "mobileMoney" | "card",
-  ) => {
-    updateBookingData({
-      paymentDetails: {
-        ...bookingData.paymentDetails,
-        paymentOption: paymentMethod,
-        [section]: {
-          ...bookingData.paymentDetails[section],
-          [field]: value,
-        },
-      },
-    });
+    // setErrors(validationErrors);
   };
 
   return (
@@ -210,16 +190,16 @@ export default function PaymentDetails({ fleet }: Props) {
                         onClick={() => {
                           setSelectedProvider(provider.key);
 
-                          updateBookingData({
-                            paymentDetails: {
-                              ...bookingData.paymentDetails,
-                              paymentOption: "mobileMoney",
-                              mobileMoney: {
-                                ...bookingData.paymentDetails.mobileMoney,
-                                provider: provider.key,
-                              },
-                            },
-                          });
+                          // updateBookingData({
+                          //   paymentDetails: {
+                          //     ...bookingData.paymentDetails,
+                          //     paymentOption: "mobileMoney",
+                          //     mobileMoney: {
+                          //       ...bookingData.paymentDetails.mobileMoney,
+                          //       provider: provider.key,
+                          //     },
+                          //   },
+                          // });
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {

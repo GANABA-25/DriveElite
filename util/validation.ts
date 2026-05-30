@@ -2,10 +2,10 @@ import {
   FormDataTypes,
   SignInDataTypes,
   contactUsDataTypes,
-  bookingDataTypes,
-  bookingDataTypesStageOne,
-  bookingDataTypesStageTwo,
 } from "@/@types/auth";
+import { bookingDataTypes, TripDetailsDataTypes } from "@/@types/bookingTypes";
+
+type BookingValidationErrors = Partial<Record<keyof bookingDataTypes, string>>;
 
 export type PaymentDataTypes = {
   paymentDetails: {
@@ -132,9 +132,102 @@ export const validateContactMessageData = (
   return errors;
 };
 
-export const validateBookingDataStageOne = (
-  bookingDetails: bookingDataTypesStageOne,
-) => {
+export const validateBookingData = (
+  bookingData: bookingDataTypes,
+): BookingValidationErrors => {
+  const errors: BookingValidationErrors = {};
+
+  if (bookingData.stage === "TripDetails") {
+    const {
+      pickupDate,
+      returnDate,
+      pickupTime,
+      returnTime,
+      pickupLocation,
+      returnLocation,
+    } = bookingData;
+
+    if (!pickupDate.trim()) {
+      errors.pickupDate = "Pickup date is required";
+    }
+
+    if (!returnDate.trim()) {
+      errors.returnDate = "Return date is required";
+    }
+
+    if (!pickupTime.trim()) {
+      errors.pickupTime = "Pickup time is required";
+    }
+
+    if (!returnTime.trim()) {
+      errors.returnTime = "Return time is required";
+    }
+
+    if (!pickupLocation.trim()) {
+      errors.pickupLocation = "Pickup location is required";
+    }
+
+    if (!returnLocation.trim()) {
+      errors.returnLocation = "Return location is required";
+    }
+
+    const now = new Date();
+
+    if (pickupDate) {
+      const pickup = new Date(`${pickupDate}T${pickupTime || "00:00"}`);
+
+      if (pickup < now) {
+        errors.pickupDate = "Pickup date/time cannot be in the past";
+      }
+    }
+
+    if (pickupDate && returnDate) {
+      const pickup = new Date(`${pickupDate}T${pickupTime || "00:00"}`);
+      const dropoff = new Date(`${returnDate}T${returnTime || "00:00"}`);
+
+      if (dropoff <= pickup) {
+        errors.returnDate = "Return date/time must be after pickup";
+      }
+    }
+  }
+
+  if (bookingData.stage === "CustomerDetails") {
+    const { fullName, email, phoneNumber, address, ghanaCard, driverLicense } =
+      bookingData;
+
+    if (!fullName.trim()) {
+      errors.fullName = "Full name is required";
+    }
+
+    if (!email.trim()) {
+      errors.email = "Email is required";
+    }
+
+    if (!phoneNumber.trim()) {
+      errors.phoneNumber = "Phone number is required";
+    }
+
+    if (!address.trim()) {
+      errors.address = "Address is required";
+    }
+
+    if (!ghanaCard.trim()) {
+      errors.ghanaCard = "Ghana card is required";
+    }
+
+    if (!driverLicense.trim()) {
+      errors.driverLicense = "Driver license is required";
+    }
+  }
+
+  return errors;
+};
+
+export const validateAllBookingData = (
+  bookingData: bookingDataTypes,
+): BookingValidationErrors => {
+  const errors: BookingValidationErrors = {};
+
   const {
     pickupDate,
     returnDate,
@@ -142,16 +235,13 @@ export const validateBookingDataStageOne = (
     returnTime,
     pickupLocation,
     returnLocation,
-  } = bookingDetails;
-
-  const errors: Record<keyof bookingDataTypesStageOne, string> = {
-    pickupDate: "",
-    returnDate: "",
-    pickupTime: "",
-    returnTime: "",
-    pickupLocation: "",
-    returnLocation: "",
-  };
+    fullName,
+    email,
+    phoneNumber,
+    address,
+    ghanaCard,
+    driverLicense,
+  } = bookingData;
 
   if (!pickupDate.trim()) {
     errors.pickupDate = "Pickup date is required";
@@ -177,102 +267,47 @@ export const validateBookingDataStageOne = (
     errors.returnLocation = "Return location is required";
   }
 
-  if (pickupDate && returnDate) {
-    const pickup = new Date(`${pickupDate}T${pickupTime || "00:00"}`);
-    const dropoff = new Date(`${returnDate}T${returnTime || "00:00"}`);
+  const now = new Date();
 
-    const now = new Date();
+  if (pickupDate) {
+    const pickup = new Date(`${pickupDate}T${pickupTime || "00:00"}`);
 
     if (pickup < now) {
       errors.pickupDate = "Pickup date/time cannot be in the past";
     }
+  }
+
+  if (pickupDate && returnDate) {
+    const pickup = new Date(`${pickupDate}T${pickupTime || "00:00"}`);
+    const dropoff = new Date(`${returnDate}T${returnTime || "00:00"}`);
 
     if (dropoff <= pickup) {
       errors.returnDate = "Return date/time must be after pickup";
     }
   }
 
-  return errors;
-};
-
-export const validateBookingDataStageTwo = (
-  bookingDetails: bookingDataTypesStageTwo,
-) => {
-  const { fullName, email, phoneNumber, address, ghanaCard, driverLicense } =
-    bookingDetails;
-
-  const errors = {
-    fullName: !fullName.trim() ? "First name is required" : "",
-
-    email: !email.trim()
-      ? "A valid email is required"
-      : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-        ? "Incorrect email format"
-        : "",
-
-    phoneNumber: !phoneNumber.trim()
-      ? "Phone number is required"
-      : !/^[0-9]{10}$/.test(phoneNumber)
-        ? "Phone number must be exactly 10 digits"
-        : "",
-
-    address: !address.trim() ? "Address is required" : "",
-
-    ghanaCard: !ghanaCard.trim()
-      ? "Ghana Card number is required"
-      : !/^GHA-\d{9}-\d$/.test(ghanaCard)
-        ? "Format must be like GHA-123456789-1"
-        : "",
-
-    driverLicense: !driverLicense.trim() ? "Driver's license is required" : "",
-  };
-
-  return errors;
-};
-
-export const validatePaymentData = (data: PaymentDataTypes) => {
-  const errors: Record<string, string> = {};
-
-  const { paymentDetails } = data;
-
-  if (paymentDetails.paymentOption === "mobileMoney") {
-    const { provider, accountNumber, accountName } = paymentDetails.mobileMoney;
-
-    if (!provider) {
-      errors.provider = "Provider is required";
-    }
-
-    if (!accountNumber) {
-      errors.accountNumber = "Account number is required";
-    } else if (!/^\d{10}$/.test(accountNumber)) {
-      errors.accountNumber =
-        "Account number must be exactly 10 digits (e.g. 0596498006)";
-    }
-
-    if (!accountName) {
-      errors.accountName = "Account name is required";
-    }
+  if (!fullName.trim()) {
+    errors.fullName = "Full name is required";
   }
 
-  if (paymentDetails.paymentOption === "creditCard") {
-    const { cardNumber, cardName, cardExpiryDate, cardCvv } =
-      paymentDetails.card;
+  if (!email.trim()) {
+    errors.email = "Email is required";
+  }
 
-    if (!cardNumber) {
-      errors.cardNumber = "Card number is required";
-    }
+  if (!phoneNumber.trim()) {
+    errors.phoneNumber = "Phone number is required";
+  }
 
-    if (!cardName) {
-      errors.cardName = "Card name is required";
-    }
+  if (!address.trim()) {
+    errors.address = "Address is required";
+  }
 
-    if (!cardExpiryDate) {
-      errors.cardExpiryDate = "Expiry date is required";
-    }
+  if (!ghanaCard.trim()) {
+    errors.ghanaCard = "Ghana card is required";
+  }
 
-    if (!cardCvv) {
-      errors.cardCvv = "CVV is required";
-    }
+  if (!driverLicense.trim()) {
+    errors.driverLicense = "Driver license is required";
   }
 
   return errors;
