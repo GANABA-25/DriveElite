@@ -32,10 +32,18 @@ import { FormState } from "@/@types/auth";
 
 type Props = {
   fleet: fleetFiltersDataTypes;
+  booking: {
+    fleetId: string;
+    pickupDate: string;
+    returnDate: string;
+    pickupTime: string;
+    returnTime: string;
+    totalDays: number;
+    dailyRate: number;
+    totalPrice: number;
+    bookingReference: string;
+  };
 };
-
-type ErrorType = Record<string, string>;
-type TouchedType = Partial<Record<keyof FormDataTypes, boolean>>;
 
 const providers = [
   { key: "MTN", label: "MTN Mobile Money", desc: "024, 054, 055, 059" },
@@ -64,10 +72,14 @@ interface paymentDataTypes {
   };
 }
 
-export default function PaymentDetails({ fleet }: Props) {
-  const { bookingData, days, formattedPrice } = useBooking();
-  const [errors, setErrors] = useState<ErrorType>({});
-  const [touched, setTouched] = useState<TouchedType>({});
+const formatPrice = (amount: number) => {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+};
+
+export default function PaymentDetails({ fleet, booking }: Props) {
   const [paymentMethod, setPaymentMethod] = useState("mobileMoney");
   const [selectedProvider, setSelectedProvider] =
     useState<paymentProviderTypes | null>(null);
@@ -189,17 +201,6 @@ export default function PaymentDetails({ fleet }: Props) {
                         }`}
                         onClick={() => {
                           setSelectedProvider(provider.key);
-
-                          // updateBookingData({
-                          //   paymentDetails: {
-                          //     ...bookingData.paymentDetails,
-                          //     paymentOption: "mobileMoney",
-                          //     mobileMoney: {
-                          //       ...bookingData.paymentDetails.mobileMoney,
-                          //       provider: provider.key,
-                          //     },
-                          //   },
-                          // });
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
@@ -238,11 +239,7 @@ export default function PaymentDetails({ fleet }: Props) {
                     name="provider"
                     value={selectedProvider || ""}
                   />
-                  <input
-                    type="hidden"
-                    name="bookingData"
-                    value={JSON.stringify(bookingData)}
-                  />
+                  <input type="hidden" name="bookingData" />
                   <div className="flex flex-col gap-2">
                     <Input
                       name="accountNumber"
@@ -260,9 +257,8 @@ export default function PaymentDetails({ fleet }: Props) {
                           e.target.value,
                         )
                       }
-                      hasError={errors.accountNumber}
                     />
-                    <FormError message={errors.accountNumber} />
+                    {/* <FormError message={errors.accountNumber} /> */}
                   </div>
 
                   <div className="flex flex-col gap-2">
@@ -280,9 +276,8 @@ export default function PaymentDetails({ fleet }: Props) {
                           e.target.value,
                         )
                       }
-                      hasError={errors.accountName}
                     />
-                    <FormError message={errors.accountName} />
+                    {/* <FormError message={errors.accountName} /> */}
                   </div>
 
                   <div className="bg-[#fef9e7] flex flex-col gap-1 p-4">
@@ -299,14 +294,16 @@ export default function PaymentDetails({ fleet }: Props) {
 
                   <div className="flex items-center gap-2">
                     <Lock size={15} />
-                    <p className="text-gray-500 text-sm">
-                      Your payment information is encrypted and secure
+
+                    <p className="text-red-600 text-sm font-bold">
+                      Note this is strictly a demo. No actual payment will be
+                      processed.
                     </p>
                   </div>
 
                   <button
                     type="submit"
-                    className={`p-2 bg-primary text-accent font-bold lg:hover:bg-primary/80 rounded-md shadow-xs cursor-pointer`}
+                    className={`p-2 bg-primary text-accent font-bold lg:hover:bg-primary/80 rounded-md shadow-xs cursor-not-allowed`}
                   >
                     {isPending ? (
                       <div className="flex justify-center ">
@@ -319,7 +316,7 @@ export default function PaymentDetails({ fleet }: Props) {
                     ) : (
                       <div className="flex justify-center items-center gap-2">
                         <Shield size={15} />
-                        Pay ${formattedPrice}
+                        Pay ${formatPrice(booking?.totalPrice)} Now
                       </div>
                     )}
                   </button>
@@ -385,7 +382,7 @@ export default function PaymentDetails({ fleet }: Props) {
                   ) : (
                     <div className="flex justify-center items-center gap-2">
                       <Shield size={15} />
-                      Pay $ 199 Now
+                      Pay $ {formatPrice(booking?.totalPrice)} Now
                     </div>
                   )}
                 </button>
@@ -415,30 +412,29 @@ export default function PaymentDetails({ fleet }: Props) {
               <div className="flex justify-between items-center">
                 <p>Pickup</p>
                 <h1 className="text-sm text-black font-medium">
-                  {formatDate(bookingData.pickupDate)} at{" "}
-                  {bookingData?.pickupTime}
+                  {formatDate(booking?.pickupDate)} at {booking?.pickupTime}
                 </h1>
               </div>
 
               <div className="flex justify-between items-center">
                 <p>Return</p>
                 <h1 className="text-sm text-black font-medium">
-                  {formatDate(bookingData.returnDate)} at{" "}
-                  {bookingData?.returnTime}
+                  {formatDate(booking?.returnDate)} at
+                  {booking?.returnTime}
                 </h1>
               </div>
 
               <div className="flex justify-between items-center">
                 <p>Duration</p>
                 <h1 className="text-sm text-black font-medium">
-                  {days} day(s)
+                  {booking?.totalDays} day(s)
                 </h1>
               </div>
 
               <div className="flex justify-between items-center">
                 <p>Daily Rate</p>
                 <h1 className="text-sm text-black font-medium">
-                  ${fleet.price}
+                  ${formatPrice(booking?.dailyRate)}
                 </h1>
               </div>
             </div>
@@ -447,7 +443,7 @@ export default function PaymentDetails({ fleet }: Props) {
           <div className="border-t border-gray-200 py-2 flex justify-between items-center">
             <h1 className=" font-bold">Total</h1>
             <p className="text-primary text-lg md:text-2xl font-bold">
-              ${formattedPrice}
+              ${formatPrice(booking?.totalPrice)}
             </p>
           </div>
         </div>
