@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function NavLinks() {
+type NavLinksProps = {
+  onNavigate?: () => void;
+};
+
+export default function NavLinks({ onNavigate }: NavLinksProps) {
   const path = usePathname();
   return (
     <ul className="flex max-[767px]:flex-col md:items-center gap-4 text-base">

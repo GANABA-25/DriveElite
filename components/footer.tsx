@@ -18,7 +18,11 @@ export default function Footer() {
               </p>
             </div>
             <form className="flex items-center gap-4">
-              <Input placeholder="Enter your email" icon={<Mail size={15} />} />
+              <Input
+                type="text"
+                placeholder="Enter your email"
+                icon={<Mail size={15} />}
+              />
               <Button>Subscribe</Button>
             </form>
           </div>

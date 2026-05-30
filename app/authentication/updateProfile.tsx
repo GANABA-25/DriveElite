@@ -81,7 +81,7 @@ export default function UpdateProfile() {
         </div>
 
         <button
-          onClick={() => setOpen(false)}
+          // onClick={() => setOpen(false)}
           className="bg-accent text-white px-4 py-2 rounded-md w-full"
         >
           Confirm

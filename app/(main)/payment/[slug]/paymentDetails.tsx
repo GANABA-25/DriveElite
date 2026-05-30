@@ -20,10 +20,8 @@ import { useActionState } from "react";
 
 import CompletedPayment from "../completedPayment";
 import Input from "@/components/input";
-import FormError from "@/components/formError";
 import Lottie from "lottie-react";
 import { formatDate } from "@/components/formatDate";
-import { useBooking } from "@/store/bookingContext";
 
 import loadingAnimation from "../../../../lottie/formLoadingAnimation.json";
 

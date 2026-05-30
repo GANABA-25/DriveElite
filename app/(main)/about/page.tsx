@@ -156,7 +156,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <Step
             icon={<Shield size={36} className="text-primary" />}
-            number="1"
+            number={1}
             title="Safety First"
             text={
               <>
@@ -167,7 +167,7 @@ export default function AboutPage() {
           />
           <Step
             icon={<Users size={36} className="text-primary" />}
-            number="2"
+            number={2}
             title="Customer Focus"
             text={
               <>
@@ -178,7 +178,7 @@ export default function AboutPage() {
           />
           <Step
             icon={<Award size={36} className="text-primary" />}
-            number="3"
+            number={3}
             title="Excellence"
             text={
               <>
@@ -188,7 +188,7 @@ export default function AboutPage() {
           />
           <Step
             icon={<Globe size={36} className="text-primary" />}
-            number="4"
+            number={4}
             title="Accessibility"
             text={
               <>
